@@ -63,45 +63,45 @@ To start working with fg-js install it with npm:
 ```
 After that you need to create a *store* for your fragments of following structure:
 ```
-	/root_folder_for_fragments
-		/name_of_your_fragment
-			/tpl.jade // template
-			/class.js // logic of thefragment
-		/another_fragment
-		...
+/root_folder_for_fragments
+	/name_of_your_fragment
+		/tpl.jade // template
+		/class.js // logic of thefragment
+	/another_fragment
+	...
 ```
 You need to compile the fragments for frontend then.
 It can be done only ones while building your project, thus no need to rebuild it any time when a page is requested.
 You can see builder example below:
-```
-	var fg = require('fg-js');
-	
-	// building your set of fragments
-	fg.build('./fg', './build.js', function(err){
-		if (err){
-			console.error(err);
-			return;
-		};
-		console.log('done!');
-	});
+```JavaScript
+var fg = require('fg-js');
+
+// building your set of fragments
+fg.build('./fg', './build.js', function(err){
+	if (err){
+		console.error(err);
+		return;
+	};
+	console.log('done!');
+});
 ```
 This snippet takes fragment sources from './fg' folder and compile it to './build.js' file, that you may include in your web application.
 Now you can render the fragment to your page in the following way:
-```
-	$fg.classes.greeter.renderIn(document.body, {data: {}});
+```JavaScript
+$fg.classes.greeter.renderIn(document.body, {data: {}});
 ```
 Where
 - greeter - is your fragment class;
 - document.body - is future parent for a fragment
 - {data: {}} - is data to be rendered with the template
 Example of *tpl.jade* file:
-```
-	div.greating hello world
+```Jade
+div.greating hello world
 ```
 And example of *class.js* file:
-```
-	fgClass.on('ready', function(){
+```JavaScript
+fgClass.on('ready', function(){
 	console.log('Greater is ready');
-	});
+});
 ```
 **Full documentation is not completed yet, but work in progress.**
