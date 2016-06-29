@@ -1,4 +1,4 @@
-# Fg-js homepage
+# Fg-js
 
 Fg-js is a small library that allows to create and use components. “Fg” is a short form for “fragment”. The library is designed to:
 - provide tools for jade-like templating;
