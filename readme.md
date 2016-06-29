@@ -4,7 +4,10 @@ Fg-js is a small library that allows to create and use components. “Fg” is a
 - provide tools for jade-like templating;
 - data-binding;
 - develop frontend using component style;
+
 It’s not a framework so you can integrate it into your application without any changes in exist architecture.
+
+Visit the home page of the project where you can find the live-demo: [https://int0h.github.io/fg-site/](https://int0h.github.io/fg-site/)
 ## Conception
 One of the goals to create fg-js was to separate logic and template. 
 First of all let’s take a look at simple Jade template:
