@@ -35,6 +35,8 @@ var scope = gapClassMgr.regGap({
 	"update": function(context, meta, scopePath, value, oldValue){		
 		var utils = require('fg-js/utils');
 		var gapClassMgr = require('fg-js/client/gapClassMgr.js');
+		value = value || [];
+		oldValue = oldValue || [];
 		for (var i = value.length; i < oldValue.length; i++){
 			context.gapStorage.removeScope(scopePath.concat([i]));
 		};

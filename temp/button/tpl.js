@@ -4,6 +4,7 @@ module.exports = [
 		"isVirtual": false,
 		"isRootNode": true,
 		"tagName": "a",
+		"eid": "btn",
 		"attrs": {
 			"class": "btn"
 		},

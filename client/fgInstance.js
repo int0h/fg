@@ -92,7 +92,7 @@ FgInstanceBase.prototype.getHtml = function(data, meta){
 	rootGap.scopePath = [];
 	this.meta = rootGap;
 	var cookedData = this.fgClass.cookData(data);
-	return this.renderTpl(this.fgClass.tpl, rootGap, data, metaMap.bind(this));
+	return this.renderTpl(this.fgClass.tpl, rootGap, cookedData, metaMap.bind(this));
 };
 
 FgInstanceBase.prototype.update = function(scopePath, newValue){

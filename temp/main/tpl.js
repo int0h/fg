@@ -7,43 +7,38 @@ module.exports = [
 		"attrs": {
 
 		},
+		"value": [
+			"name"
+		],
 		"content": [
-			" Hello! That's test app"
-		]
-	},
-	"",
-	{
-		"type": "raw",
-		"isVirtual": false,
-		"isRootNode": true,
-		"tagName": "h3",
-		"attrs": {
 
-		},
-		"content": [
-			" list of things to do:"
 		]
 	},
 	{
 		"type": "raw",
 		"isVirtual": false,
 		"isRootNode": true,
-		"tagName": "div",
+		"tagName": "section",
 		"attrs": {
-			"class": "col2"
+			"class": "skills"
 		},
 		"content": [
-			"<table class=\"table\">",
-			"<thead>",
-			"<tr>",
-			"<th>",
-			" Name",
-			"</th>",
-			"<th>",
-			" Tags",
-			"</th>",
-			"</tr>",
-			"</thead>",
+			{
+				"type": "raw",
+				"isVirtual": false,
+				"isRootNode": false,
+				"tagName": "h3",
+				"attrs": {
+
+				},
+				"value": [
+					"skillsTitle"
+				],
+				"content": [
+
+				]
+			},
+			"<table>",
 			{
 				"type": "raw",
 				"isVirtual": false,
@@ -57,7 +52,7 @@ module.exports = [
 						"type": "scope",
 						"isVirtual": true,
 						"path": [
-							"todo"
+							"skills"
 						],
 						"content": [
 							{
@@ -69,6 +64,23 @@ module.exports = [
 
 								},
 								"content": [
+									"<td>",
+									{
+										"type": "raw",
+										"isVirtual": false,
+										"isRootNode": false,
+										"tagName": "div",
+										"attrs": {
+											"class": "skillGroup"
+										},
+										"value": [
+											"name"
+										],
+										"content": [
+
+										]
+									},
+									"</td>",
 									{
 										"type": "raw",
 										"isVirtual": false,
@@ -78,20 +90,175 @@ module.exports = [
 
 										},
 										"value": [
-											"name"
+											"list"
 										],
 										"content": [
 
 										]
+									}
+								],
+								"isScopeItem": true
+							}
+						],
+						"eid": null
+					}
+				],
+				"isScopeHolder": true
+			},
+			"</table>"
+		]
+	},
+	{
+		"type": "raw",
+		"isVirtual": false,
+		"isRootNode": true,
+		"tagName": "section",
+		"attrs": {
+			"class": "education"
+		},
+		"content": [
+			"<h3>",
+			" Education",
+			"</h3>",
+			{
+				"type": "raw",
+				"isVirtual": false,
+				"isRootNode": false,
+				"tagName": "ul",
+				"attrs": {
+
+				},
+				"content": [
+					{
+						"type": "scope",
+						"isVirtual": true,
+						"path": [
+							"education"
+						],
+						"content": [
+							{
+								"type": "raw",
+								"isVirtual": false,
+								"isRootNode": false,
+								"tagName": "li",
+								"attrs": {
+
+								},
+								"content": [
+									"[",
+									{
+										"type": "data",
+										"isVirtual": false,
+										"path": [
+											"range",
+											"0"
+										],
+										"eid": null
 									},
-									"<td>",
+									" - ",
+									{
+										"type": "data",
+										"isVirtual": false,
+										"path": [
+											"range",
+											"1"
+										],
+										"eid": null
+									},
+									"] ",
+									{
+										"type": "data",
+										"isVirtual": false,
+										"path": [
+											"name"
+										],
+										"eid": null
+									}
+								],
+								"isScopeItem": true
+							}
+						],
+						"eid": null
+					}
+				],
+				"isScopeHolder": true
+			}
+		]
+	},
+	{
+		"type": "raw",
+		"isVirtual": false,
+		"isRootNode": true,
+		"tagName": "section",
+		"attrs": {
+			"class": "experience"
+		},
+		"content": [
+			"<h3>",
+			" Work Experience",
+			"</h3>",
+			{
+				"type": "raw",
+				"isVirtual": false,
+				"isRootNode": false,
+				"tagName": "ul",
+				"attrs": {
+
+				},
+				"content": [
+					{
+						"type": "scope",
+						"isVirtual": true,
+						"path": [
+							"experience"
+						],
+						"content": [
+							{
+								"type": "raw",
+								"isVirtual": false,
+								"isRootNode": false,
+								"tagName": "li",
+								"attrs": {
+
+								},
+								"content": [
+									"<h4>",
+									{
+										"type": "data",
+										"isVirtual": false,
+										"path": [
+											"name"
+										],
+										"eid": null
+									},
+									" [",
+									{
+										"type": "data",
+										"isVirtual": false,
+										"path": [
+											"date"
+										],
+										"eid": null
+									},
+									"]",
+									"</h4>",
+									"<p class=\"desc\">",
+									{
+										"type": "data",
+										"isVirtual": false,
+										"path": [
+											"desc"
+										],
+										"eid": null
+									},
+									"</p>",
 									{
 										"type": "raw",
 										"isVirtual": false,
 										"isRootNode": false,
-										"tagName": "div",
+										"tagName": "ul",
 										"attrs": {
-											"class": "tag-box"
+											"class": "tags"
 										},
 										"content": [
 											{
@@ -102,67 +269,182 @@ module.exports = [
 												],
 												"content": [
 													{
-														"type": "fg",
-														"isVirtual": true,
-														"fgName": "tag",
-														"path": [
+														"type": "raw",
+														"isVirtual": false,
+														"isRootNode": false,
+														"tagName": "li",
+														"attrs": {
 
-														],
-														"eid": null,
+														},
 														"content": [
 															{
-																"type": "data",
-																"isVirtual": false,
+																"type": "fg",
+																"isVirtual": true,
+																"fgName": "tag",
 																"path": [
 
 																],
-																"eid": null
+																"eid": null,
+																"content": [
+																	{
+																		"type": "data",
+																		"isVirtual": false,
+																		"path": [
+
+																		],
+																		"eid": null
+																	}
+																]
 															}
-														]
+														],
+														"isScopeItem": true
 													}
 												],
 												"eid": null
-											},
-											""
+											}
 										],
 										"isScopeHolder": true
-									},
-									"</td>"
+									}
 								],
 								"isScopeItem": true
-							},
-							""
+							}
 						],
-						"eid": "row"
+						"eid": null
 					}
 				],
 				"isScopeHolder": true
-			},
-			"</table>"
+			}
 		]
 	},
 	{
-		"type": "fg",
-		"isVirtual": true,
-		"fgName": "button",
-		"path": [
-
-		],
-		"eid": "helloBtn",
+		"type": "raw",
+		"isVirtual": false,
+		"isRootNode": true,
+		"tagName": "section",
+		"attrs": {
+			"class": "projects"
+		},
 		"content": [
-			" hello!"
-		]
-	},
-	{
-		"type": "fg",
-		"isVirtual": true,
-		"fgName": "tag",
-		"path": [
+			"<h3>",
+			" Projects",
+			"</h3>",
+			{
+				"type": "raw",
+				"isVirtual": false,
+				"isRootNode": false,
+				"tagName": "ul",
+				"attrs": {
 
-		],
-		"eid": null,
-		"content": [
-			" I'm tag"
+				},
+				"content": [
+					{
+						"type": "scope",
+						"isVirtual": true,
+						"path": [
+							"projects"
+						],
+						"content": [
+							{
+								"type": "raw",
+								"isVirtual": false,
+								"isRootNode": false,
+								"tagName": "li",
+								"attrs": {
+
+								},
+								"content": [
+									"<h4>",
+									{
+										"type": "data",
+										"isVirtual": false,
+										"path": [
+											"name"
+										],
+										"eid": null
+									},
+									" [",
+									{
+										"type": "data",
+										"isVirtual": false,
+										"path": [
+											"date"
+										],
+										"eid": null
+									},
+									"]",
+									"</h4>",
+									"<p class=\"desc\">",
+									{
+										"type": "data",
+										"isVirtual": false,
+										"path": [
+											"desc"
+										],
+										"eid": null
+									},
+									"</p>",
+									{
+										"type": "raw",
+										"isVirtual": false,
+										"isRootNode": false,
+										"tagName": "ul",
+										"attrs": {
+											"class": "tags"
+										},
+										"content": [
+											{
+												"type": "scope",
+												"isVirtual": true,
+												"path": [
+													"tags"
+												],
+												"content": [
+													{
+														"type": "raw",
+														"isVirtual": false,
+														"isRootNode": false,
+														"tagName": "li",
+														"attrs": {
+
+														},
+														"content": [
+															{
+																"type": "fg",
+																"isVirtual": true,
+																"fgName": "tag",
+																"path": [
+
+																],
+																"eid": null,
+																"content": [
+																	{
+																		"type": "data",
+																		"isVirtual": false,
+																		"path": [
+
+																		],
+																		"eid": null
+																	}
+																]
+															}
+														],
+														"isScopeItem": true
+													}
+												],
+												"eid": null
+											}
+										],
+										"isScopeHolder": true
+									}
+								],
+								"isScopeItem": true
+							}
+						],
+						"eid": null
+					}
+				],
+				"isScopeHolder": true
+			}
 		]
 	}
 ]

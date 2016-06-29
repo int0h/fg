@@ -1,7 +1,7 @@
 module.exports = function anonymous(fgClass,fgProto
 /**/) {
 fgClass.on('ready', function(){
-	var self = this;
+/*	var self = this;
 	console.log('ready');
 	self.data = {
 		"todo": []
@@ -14,6 +14,15 @@ fgClass.on('ready', function(){
 			"tags": [Math.round((Math.pow(2, Math.random()*32))).toString(2), Math.round((Math.pow(2, Math.random()*32))).toString(2)]
 		});
 		self.update([], data);
-	})
+	})*/
 });
+
+fgClass.cookData = function(data){
+	data.skills = data.skills.map(function(skill){
+		skill.list = skill.items.join(', ');
+		skill.name += ': ';
+		return skill;
+	});
+	return data;
+}
 }
