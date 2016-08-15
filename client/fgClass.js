@@ -1,6 +1,7 @@
+"use strict";
+
 var EventEmitter = require('fg-js/eventEmitter.js');
 var globalEvents = require('fg-js/client/globalEvents.js');
-var utils = require('fg-js/utils.js');
 var fgInstanceModule = require('fg-js/client/fgInstance.js');
 
 var fgClassTable = [];
@@ -11,7 +12,7 @@ function FgClass(opts){
 	this.instances = [];
 	this.tpl = opts.tpl;
 	this.name = opts.name;
-	this.eventEmitter = new EventEmitter;
+	this.eventEmitter = new EventEmitter();
 	fgClassDict[opts.name] = this;
 	fgClassTable.push(this);	
 	function FgInstance(){
@@ -25,46 +26,14 @@ function FgClass(opts){
 		classFn(this, this.createFn.prototype);
 	};
 };
-/*
-function isInside(fg, node, selector){
-	var domElms = fg.getDom();
-	var matched = [];
-	domElms.forEach(function(elm){
-		var nodeList = elm.querySelectorAll(selector);
-		var nodeArr = [].slice.call(nodeList);
-		matched = matched.concat(nodeArr);
-	});
-	while (node){
-		if (~domElms.indexOf(node)){
-			return false;
-		};
-		if (~matched.indexOf(node)){
-			return true;
-		};
-		node = node.parentNode;
-	};
-	return false;
-};*/
 
-/*function isInside(fg, node){
-	var domElms = fg.getDom();
-	while (node){
-		if (~domElms.indexOf(node)){
-			return true;
-		};
-		node = node.parentNode;
-	};
-	return false;
-};
-*/
 function match(fg, node, selector){
 	var domElms = fg.getDom();
-	var rootReached = false;
 	while (node){
 		if (node.matches(selector)){
 			return true;
 		};
-		if (~domElms.indexOf(node)){
+		if (domElms.indexOf(node) >= 0){
 			return false;
 		};		
 		node = node.parentNode;
@@ -73,7 +42,7 @@ function match(fg, node, selector){
 };
 
 FgClass.prototype.on = function(name, selector, fn){	
-	if (arguments.length == 2){
+	if (arguments.length === 2){
 		name = name;
 		fn = arguments[1];
 		selector = null;
@@ -89,7 +58,7 @@ FgClass.prototype.on = function(name, selector, fn){
 	this.eventEmitter.on(name, fn);	
 };
 
-FgClass.prototype.emit = function(name/*, rest*/){
+FgClass.prototype.emit = function(/*name..., rest*/){
 	this.eventEmitter.emit.apply(this.eventEmitter, arguments);	
 };
 
@@ -103,7 +72,7 @@ FgClass.prototype.cookData = function(data){
 
 FgClass.prototype.render = function(data, meta, parent){
 	if (data instanceof HTMLElement){
-		return this.renderIn.apply(this, arguments)
+		return this.renderIn.apply(this, arguments);
 	};
 	var fg = new fgInstanceModule.FgInstance(this, parent);
 	fg.code = fg.getHtml(data, meta);
@@ -120,7 +89,7 @@ FgClass.prototype.renderIn = function(parentNode, data, meta, parent){
 FgClass.prototype.appendTo = function(parentNode, data){
 	var fg = this.render(data);	
 	var div = document.createElement('div');
-	div.innerHTML = fd.code;
+	div.innerHTML = fg.code;
 	[].slice.call(div.children).forEach(function(child){
 		parentNode.appendChild(child);
 	});

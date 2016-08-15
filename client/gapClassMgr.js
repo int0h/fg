@@ -1,15 +1,30 @@
-var gapClasses = require('./gaps.js');
-var utils = require('fg-js/utils');
+"use strict";
 
-function Gap(context, parsedMeta, parent){
-	utils.extend(this, parsedMeta);
+var gapClasses = {};
+var utils = require('fg-js/utils');
+var valueMgr = require('fg-js/valueMgr');
+
+function regGap(gapHandler){	
+	gapClasses[gapHandler.name] = gapHandler;
+	return gapHandler;
+};
+exports.regGap = regGap;
+
+function Gap(context, parsedMeta, parent){	
+	utils.extend(this, parsedMeta); // todo: why?
 	this.children = [];	
 	this.parent = parent || null;
 	this.root = this;
 	this.context = context;	
-	this.scopePath = utils.getScopePath(this);
+	//this.scopePath = utils.getScopePath(this);
 	//this.triggers = [];
 	context.gapStorage.reg(this);
+	if (this.path){
+		this.resolvedPath = valueMgr.resolvePath(this, this.path); 
+		if (this.resolvedPath.source === "data"){
+			context.gapStorage.setTriggers(this, [this.resolvedPath.path]);
+		};	
+	};
 	if (!parent){
 		return this;
 	};
@@ -19,9 +34,9 @@ function Gap(context, parsedMeta, parent){
 
 Gap.prototype.closest = function(selector){
 	var eid = selector.slice(1);
-	gap = this.parent;
+	var gap = this.parent;
 	while (gap){
-		if (gap.eid == eid){
+		if (gap.eid === eid){
 			return gap;
 		};
 		gap = gap.parent;
@@ -30,7 +45,7 @@ Gap.prototype.closest = function(selector){
 };
 
 Gap.prototype.data = function(val){
-	if (arguments.length == 0){
+	if (arguments.length === 0){
 		return utils.objPath(this.scopePath, this.context.data);
 	};
 	this.context.update(this.scopePath, val);	

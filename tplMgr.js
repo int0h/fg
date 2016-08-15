@@ -62,7 +62,7 @@ function readTpl(ast, code, parentMeta){
 				return; 
 			};	
 			if (!node.children || node.children.length == 0){
-				parts.push(mj.render(node));				
+				parts.push(mj.render(node, {}));				
 				return;
 			};
 			var wrap = mj.renderWrapper(node);

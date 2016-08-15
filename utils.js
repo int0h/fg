@@ -1,4 +1,5 @@
 var tplUtils = require('fg-js/utils/tplUtils.js');
+var valueMgr = require('fg-js/valueMgr.js');
 extend(exports, tplUtils);
 
 function objFor(obj, fn){
@@ -7,6 +8,16 @@ function objFor(obj, fn){
 	};
 };
 exports.objFor = objFor;
+
+function objMap(obj, fn){
+	var newObj = {};
+	objFor(obj, function(item, id){
+		var newItem = fn(item, id, obj);
+		newObj[id] = newItem;
+	});
+	return newObj;
+};
+exports.objMap = objMap;
 
 function objPath(path, obj, newVal){
 	if (path.length < 1){
@@ -203,9 +214,11 @@ exports.insertHTMLBeforeComment = insertHTMLBeforeComment;
 
 function parsePath(parsedNode){
 	if (parsedNode.attrs.class){
-		return parsedNode.attrs.class.value.split(' ');
+		var parts = parsedNode.attrs.class.value.split(' ');
+		var parsed =  valueMgr.read(parts);
+		return parsed;
 	};
-	return [];
+	return valueMgr.read([]);
 };
 exports.parsePath = parsePath;
 
@@ -228,3 +241,14 @@ function deepClone(obj){
 	return obj;
 };
 exports.deepClone = deepClone;
+
+function getAttrsPaths(attrs){
+	var paths = [];
+	objFor(attrs, function(value, name){
+		var nameTpl = new StrTpl(name);
+		var valueTpl = new StrTpl(value);
+		paths = paths.concat(nameTpl.getPaths(), valueTpl.getPaths());		
+	});
+	return paths;
+};
+exports.getAttrsPaths = getAttrsPaths;

@@ -1,3 +1,5 @@
+"use strict";
+
 function EventEmitter(parent){
 	this.events = {};
 	this.parent = parent;

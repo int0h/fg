@@ -1,3 +1,5 @@
+"use strict";
+
 var utils = require('fg-js/utils.js');
 var TreeHelper = require('fg-js/utils/treeHelper.js');
 
@@ -66,23 +68,23 @@ GapStorage.prototype.reg = function(gapMeta){
 GapStorage.prototype.assign = function(){
 	//if ()
 	this.gaps.forEach(function(gapMeta){
-		if (gapMeta.type != "root" && gapMeta.fg){
+		if (gapMeta.type !== "root" && gapMeta.fg){
 			gapMeta.fg.assign();
 		};
 	});
 	return;
-	var self = this;
-	var gapNodes = this.context.dom.getElementsByClassName('fg-gap-' + this.context.id);
-	for (var i = 0; i < gapNodes.length; i++){
-		var gapNode = gapNodes[i];
-		var gid = gapNode.getAttribute('data-fg-' + this.context.id + '-gap-id');
-		var gap = self.gaps[gid];
-		if (!gap){continue};
-		if (gap.meta.fg){
-			gap.meta.fg.assign();
-		};
-		gap.meta.dom = gapNode;
-	};
+	// var self = this;
+	// var gapNodes = this.context.dom.getElementsByClassName('fg-gap-' + this.context.id);
+	// for (var i = 0; i < gapNodes.length; i++){
+	// 	var gapNode = gapNodes[i];
+	// 	var gid = gapNode.getAttribute('data-fg-' + this.context.id + '-gap-id');
+	// 	var gap = self.gaps[gid];
+	// 	if (!gap){continue};
+	// 	if (gap.meta.fg){
+	// 		gap.meta.fg.assign();
+	// 	};
+	// 	gap.meta.dom = gapNode;
+	// };
 };
 
 /*GapStorage.prototype.subTree = function(scopePath){
@@ -101,7 +103,7 @@ GapStorage.prototype.assign = function(){
 GapStorage.prototype.byScope = function(scopePath, targetOnly){
 	var scope = this.scopeTree.access(scopePath);		
 	var subNodes = [];
-	if (scope.childCount != 0 && !targetOnly){
+	if (scope.childCount !== 0 && !targetOnly){
 		subNodes = scope.getDeepChildArr().map(function(node){
 			return {
 				gaps: node.data.gaps,
@@ -126,7 +128,7 @@ GapStorage.prototype.removeScope = function(scopePath){
 	});
 	this.scopeTree.remove(scopePath);
 	this.gaps = this.gaps.filter(function(gap){
-		return !~removedGaps.indexOf(gap);
+		return removedGaps.indexOf(gap) < 0;
 	});
 	removedDomGaps.forEach(function(gap){
 		gap.removeDom();

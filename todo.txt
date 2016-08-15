@@ -1,0 +1,7 @@
+- path parsing
+- dataset?
+- data access standardization
+- triggers? too complex
+- data transform
+- tests
+- class modifications

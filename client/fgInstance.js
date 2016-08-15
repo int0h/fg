@@ -1,3 +1,5 @@
+"use strict";
+
 var gapClassMgr = require('fg-js/client/gapClassMgr.js');
 var renderTpl = require('fg-js/tplRender.js').renderTpl;
 var EventEmitter = require('fg-js/eventEmitter.js');
@@ -27,7 +29,7 @@ FgInstanceBase.prototype.on = function(event, fn){
 	this.eventEmitter.on(event, fn);	
 };
 
-FgInstanceBase.prototype.emit = function(name/*, rest*/){
+FgInstanceBase.prototype.emit = function(/*name..., rest*/){
 	this.eventEmitter.emit.apply(this.eventEmitter, arguments);	
 };
 
@@ -56,16 +58,10 @@ function getClasses(meta){
 	return meta.attrs.class.split(' ');
 };
 
-function metaMap(metaPart, id){
-	/*var res = utils.concatObj({}, metaPart || {});
-	var attrsObj = metaPart.attrs || {};//utils.keyValueToObj(metaPart.attrs || [], 'name', 'value');
-	var tplClasses = (res.attrs && res.attrs.class || '').split(' ');
-	var fg_cid = "fg-cid-" + this.fgClass.id;
-	var classes = ['fg', fg_cid].concat(tplClasses);	
-	attrsObj.class = classes.join(' ');*/
+function metaMap(fg, metaPart){
 	var res = utils.simpleClone(metaPart);
 	var classes = getClasses(res);
-	var fg_cid = "fg-cid-" + this.fgClass.id;
+	var fg_cid = "fg-cid-" + fg.fgClass.id;
 	res.attrs = utils.simpleClone(metaPart.attrs);
 	if (Array.isArray(res.attrs.class)){
 		res.attrs.class = ['fg', ' ', fg_cid, ' '].concat(classes);
@@ -92,14 +88,14 @@ FgInstanceBase.prototype.getHtml = function(data, meta){
 	rootGap.scopePath = [];
 	this.meta = rootGap;
 	var cookedData = this.fgClass.cookData(data);
-	return this.renderTpl(this.fgClass.tpl, rootGap, cookedData, metaMap.bind(this));
+	return this.renderTpl(this.fgClass.tpl, rootGap, cookedData, metaMap.bind(null, this));
 };
 
 FgInstanceBase.prototype.update = function(scopePath, newValue){
-	if (arguments.length == 0){
+	if (arguments.length === 0){
 		return this.update([], this.data); // todo
 	};
-	if (arguments.length == 1){
+	if (arguments.length === 1){
 		return this.update([], arguments[0]);
 	};
 	var value = utils.deepClone(newValue);
@@ -121,9 +117,9 @@ FgInstanceBase.prototype.update = function(scopePath, newValue){
 	});
 	scope.parents.forEach(function(parentNode){
 		parentNode.data.gaps.forEach(function(parentGap){
-			if (parentGap.type == "fg"){
+			if (parentGap.type === "fg"){
 				var subPath = scopePath.slice(parentGap.scopePath.length);
-				var subVal = utils.objPath(subPath, self.data);
+				//var subVal = utils.objPath(subPath, self.data);
 				parentGap.fg.update(subPath, newValue);
 			};			
 		});
@@ -132,11 +128,11 @@ FgInstanceBase.prototype.update = function(scopePath, newValue){
 		var subVal = utils.objPath(sub.path, self.data);	
 		var subPath = sub.path.slice(scopePath.length);
 		var oldSubVal = utils.objPath(subPath, oldValue);
-		if (subVal == oldSubVal){
+		if (subVal === oldSubVal){
 			return;
 		};
 		sub.gaps.forEach(function(gap){
-			if (!~self.gapStorage.gaps.indexOf(gap)){
+			if (self.gapStorage.gaps.indexOf(gap) < 0){
 				return;
 			};
 			gapClassMgr.update(self, gap, sub.path, subVal, oldSubVal);
@@ -153,7 +149,7 @@ function createScopeHelper(fg, obj, scopePath){
 		var propScopePath = scopePath.concat([key]);
 		Object.defineProperty(helper, key, {
 			get: function(){
-				if (typeof value == "object"){
+				if (typeof value === "object"){
 					return createScopeHelper(fg, obj[key], propScopePath);
 				};
 				return obj[key];
@@ -164,14 +160,6 @@ function createScopeHelper(fg, obj, scopePath){
 		});
 	});
 	return helper;
-};
-
-function createFnDataHelper(fg, obj, scopePath){
-
-	utils.objFor(obj, function(value, key){
-		var propScopePath = scopePath.concat([key]);
-
-	});
 };
 
 FgInstanceBase.prototype.$d = function(){
@@ -231,7 +219,7 @@ FgInstanceBase.prototype.getDom = function(){
 FgInstanceBase.prototype.jq = function(){
 	var dom = this.getDom();
 	var res = helper.jq(dom);
-	if (arguments.length == 0){
+	if (arguments.length === 0){
 		return res;
 	};
 	var selector = arguments[0];
@@ -239,7 +227,7 @@ FgInstanceBase.prototype.jq = function(){
 		.parent()
 		.find(selector)
 		.filter(function(id, elm){
-			return ~dom.indexOf(elm);
+			return dom.indexOf(elm) >= 0;
 		});
 	var childSelected = res.find(selector);
 	return selfSelected.add(childSelected);

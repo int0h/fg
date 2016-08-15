@@ -1,5 +1,6 @@
 var utils = require('fg-js/utils');
 var gapTable = {};
+var path = require('path');
 
 function regGap(gapHandler){	
 	gapTable[gapHandler.name] = gapHandler;
@@ -51,6 +52,38 @@ function genClientCode(){
 	return clientCode;
 };
 
+function readGapDir(gapPath){
+	var name = /\/([^\/]*)\/?$/.exec(gapPath)[1];
+	//var reqPath = './' + path.relative(path.dirname(module.filename), gapPath).replace(/\\/g, '/');
+	var clientPath = path.dirname(require.resolve('fg-js/client/main.js'));
+	var reqPath = path.relative(clientPath, gapPath).replace(/\\/g, '/');
+	var configObj = {
+		"name": name,
+		"path": reqPath,
+		"parse": require(gapPath + '/parse.js'),
+		"render": require(gapPath + '/render.js'),
+		"update": require(gapPath + '/update.js')
+	};
+	regGap(configObj);
+};
+
+
+function genIncludeFile(){
+	var code = "var gapClassMgr = require('fg-js/client/gapClassMgr.js');";
+	utils.objFor(gapTable, function(gap){
+		code += '\ngapClassMgr.regGap({\n'
+			+ '\t"name": "' + gap.name + '",\n'
+			+ '\t"path": "' + gap.path + '",\n'
+			//+ '\t"parse": require("' + gap.path + '/parse.js"),\n'
+			+ '\t"render": require("' + gap.path + '/render.js"),\n'
+			+ '\t"update": require("' + gap.path + '/update.js"),\n'
+			+ '});'
+	});
+	return code;
+};
+
+exports.genIncludeFile = genIncludeFile;
+exports.readGapDir = readGapDir;
 exports.regGap = regGap;
 exports.parse = parse;
 exports.render = render;

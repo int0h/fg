@@ -1,4 +1,3 @@
-var StrTpl = require('fg-js/utils/strTpl.js');
 var utils = require('fg-js/utils.js');
 
 var selfClosingTags = ["area", "base", "br", "col", 
@@ -29,24 +28,3 @@ function renderTag(tagInfo){
 };
 exports.renderTag = renderTag;	
 
-function renderAttrs(attrs, data){
-	var resAttrs = {};
-	utils.objFor(attrs, function(value, name){
-		var nameTpl = new StrTpl(name);
-		var valueTpl = new StrTpl(value);
-		resAttrs[nameTpl.render(data)] = valueTpl.render(data);		
-	});	
-	return resAttrs;
-};
-exports.renderAttrs = renderAttrs;
-
-function getAttrsPaths(attrs){
-	var paths = [];
-	utils.objFor(attrs, function(value, name){
-		var nameTpl = new StrTpl(name);
-		var valueTpl = new StrTpl(value);
-		paths = paths.concat(nameTpl.getPaths(), valueTpl.getPaths());		
-	});
-	return paths;
-};
-exports.getAttrsPaths = getAttrsPaths;

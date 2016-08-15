@@ -7,6 +7,25 @@ var fgMgr = require('fg-js/fgMgr.js');
 var serverUtils = require('fg-js/serverUtils');
 var fse = require('fs-extra');
 
+var fgLibPath = path.dirname(require.resolve('fg-js')) + '/';
+
+function getSubDirs(srcpath) {
+	return fs.readdirSync(srcpath).filter(function(file) {
+		return fs.statSync(path.join(srcpath, file)).isDirectory();
+	})
+	.map(function(path){
+		return srcpath + '/' + path;
+	});
+};
+
+function readGapDirs(path){
+	var dirs = getSubDirs(path);
+	dirs.forEach(gapClassMgr.readGapDir.bind(gapClassMgr));
+};
+
+var gapsDir = fgLibPath + '/gaps/';
+readGapDirs(gapsDir);
+
 function load(name, dirPath){	
 	var sources = {
 		"tpl": null,
@@ -45,19 +64,18 @@ function loadDir(path){
 };
 exports.loadDir = loadDir;
 
-var fgLibPath = require.resolve('fg-js').replace(/index\.js$/g, '');
-
 function buildRuntime(destPath, cb){
 	var brofy = browserify({
 		debug: true
 	});
-	var gapsCode = gapClassMgr.genClientCode();
+	var gapsCode = gapClassMgr.genIncludeFile();
 	fs.writeFileSync(fgLibPath + 'client/gaps.js', gapsCode);
 	brofy.add(fgLibPath + 'client/main.js').bundle(function(err, code){
 		if (err){
 			console.error(err);
 			return;
 		};
+		fs.writeFileSync(fgLibPath + 'tests/runtime.js', code);
 		fs.writeFileSync(destPath, code);
 		cb(null);
 	});
@@ -84,7 +102,8 @@ exports.build = function(srcPath, destPath, cb){
 		debug: true
 	});
 	loadDir(srcPath);
-	var tempPath = path.resolve(fgLibPath, './temp');	
+	//var tempPath = path.resolve(fgLibPath, './temp');	
+	var tempPath = path.resolve(process.cwd(), './temp');	
 	fse.emptyDirSync(tempPath);
 	var includeCodeParts = []; 
 	for (var i in fgMgr.fgTable){

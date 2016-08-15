@@ -1,57 +1,65 @@
-var utils = require('fg-js/utils');
-
-function StrTpl(tpl){
-	this.tpl = tpl;
-};
-
-StrTpl.parse = function(str){
-	var re = /\%\@?[\w\d_\.]+%/g;
-	var gaps = str.match(re);
-	if (!gaps){
-		return str;
+function StrTpl(tpl, valueParseFn){
+	if (typeof tpl == "object"){
+		this.src = tpl.src;
+		this.gaps = tpl.gaps;
+		this.parts = tpl.parts;
+		return;
 	};
-	gaps = gaps.map(function(gap){
-		var pathStr = gap.slice(1, -1);
-		var path = [];
-		if (pathStr[0] == "@"){
-			pathStr = pathStr.slice(1);
-		}else{
-			path = ["data"];
-		};
-		var path = path.concat(pathStr.split('.'));
-		return {
-			"path": path
-		};
-	});
-	var tplParts = str.split(re);
-	var tpl = utils.mixArrays(tplParts, gaps);
-	return tpl;
+    this.src = tpl;
+    this.parts = [];
+    this.gaps = [];
+    return this.parse(tpl, valueParseFn);
 };
 
-StrTpl.prototype.getPaths = function(){
-	var paths = [];
-	if (typeof tpl == "string"){
-		return paths;
-	};	
-	tpl.forEach(function(part){
-		if (typeof part == "string"){
-			return;
-		};
-		return path.push(part.path);
-	});
-	return paths;
-};
-
-StrTpl.prototype.render = function(data){
-	if (typeof tpl == "string"){
-		return tpl;
+StrTpl.read = function(tpl, valueParseFn){
+	var res = new StrTpl(tpl, valueParseFn);
+	if (res.isString){
+		res = tpl;
 	};
-	return tpl.map(function(part){
-		if (typeof part == "string"){
-			return part;
+	return res;
+};
+
+var gapRe = /\$\{[^\}]*\}/gm;
+
+StrTpl.prototype.parse = function(tpl, valueParseFn){
+	var gapStrArr = tpl.match(gapRe)
+	if (!gapStrArr){
+		this.isString = true;
+		this.parts = [tpl];
+		return;
+	};
+	gapStrArr = gapStrArr.map(function(part){
+		return part.slice(2, -1);
+	});	
+	this.gaps = gapStrArr.map(valueParseFn);
+	this.parts = tpl.split(gapRe);
+	return this;
+};
+
+function mixArrays(arrays){
+	var id = 0;
+	var maxLength = 0;
+	var totalLength = 0;
+	for (var i = 0; i < arguments.length; i++){
+		maxLength = Math.max(arguments[i].length, maxLength);
+		totalLength += arguments[i].length;
+	};
+	var resArr = [];
+	var arrayCount = arguments.length;
+	for (var id = 0; id < maxLength; id++){				
+		for (var i = 0; i < arrayCount; i++){
+			if (arguments[i].length > id){
+				resArr.push(arguments[i][id]);
+			};
 		};
-		return objPath(part.path, data);
-	}).join('');	
+	};
+	return resArr;
+};
+
+StrTpl.prototype.render = function(valueRenderFn){
+	var gaps = this.gaps.map(valueRenderFn);
+	var parts = mixArrays(this.parts, gaps);
+	return parts.join('');	
 };
 
 module.exports = StrTpl;
