@@ -2,17 +2,17 @@
 
 //import {path} from 'path';
 
-var fs = require('fs');
-var path = require('path');
-var gapClassMgr = require('./gapClassMgr.js');
-var browserify = require('browserify');
-var FgMgr = require('./fgMgr.js');
-var serverUtils = require('./serverUtils');
-var fse = require('fs-extra');
+import * as fs from 'fs';
+import * as fse from 'fs-extra';
+import * as path from 'path';
+import * as gapClassMgr from './gapServer.ts';
+import * as browserify from 'browserify';
+import {FgMgr} from './fgMgr.ts';
+import * as serverUtils from './serverUtils.ts';
 
 var fgLibPath = path.dirname(require.resolve('fg-js')) + '/';
 
-function getSubDirs(srcpath) {
+function getSubDirs(srcpath: string): string[]{
 	return fs.readdirSync(srcpath).filter(function(file) {
 		return fs.statSync(path.join(srcpath, file)).isDirectory();
 	})
@@ -21,14 +21,15 @@ function getSubDirs(srcpath) {
 	});
 };
 
-function readGapDirs(path){
+function readGapDirs(path: string){
 	var dirs = getSubDirs(path);
 	dirs.forEach(gapClassMgr.readGapDir.bind(gapClassMgr));
 };
-var gapsDir = fgLibPath + '/gaps/';
-readGapDirs(gapsDir);
 
-function load(fgMgr, name, dirPath){	
+var gapsDir = fgLibPath + '/gaps/';
+//readGapDirs(gapsDir);
+
+export function load(fgMgr: FgMgr, name: string, dirPath: string){	
 	var sources = {
 		"tpl": null,
 		"classFn": null
@@ -54,9 +55,8 @@ function load(fgMgr, name, dirPath){
 	
 	fgMgr.readFg(name, sources);
 };
-exports.load = load;
 
-function loadDir(fgMgr, path){
+export function loadDir(fgMgr: FgMgr, path: string){
 	var subDirs = serverUtils.getSubFolders(path);
 	subDirs.forEach(function(subPath){
 		var childName = subPath;
@@ -64,9 +64,8 @@ function loadDir(fgMgr, path){
 		load(fgMgr, childName, childPath);
 	});
 };
-exports.loadDir = loadDir;
 
-function buildTest(cb){
+export function buildTest(cb: Function){
 	var testDir = fgLibPath + 'tests/';
 	buildRuntime(testDir + '/build/runtime.js', function(err){
 		if (err){
@@ -78,9 +77,8 @@ function buildTest(cb){
 		});
 	});
 };
-exports.buildTest = buildTest;
 
-function buildRuntime(destPath, cb){
+export function buildRuntime(destPath: string, cb: Function){
 	var brofy = browserify({
 		debug: true
 	});
@@ -95,7 +93,6 @@ function buildRuntime(destPath, cb){
 		cb(null);
 	});
 };
-exports.buildRuntime = buildRuntime;
 
 var includeWrap = [
 `var fgs = [];
@@ -112,7 +109,7 @@ var includeFgCode = `fgs.push({
 	"classFn": %classFn%
 });`;
 
-function build(srcPath, destPath, cb){
+export function build(srcPath: string, destPath: string, cb: Function){
 	var fgMgr = new FgMgr();
 	var brofy = browserify({
 		debug: true
@@ -155,5 +152,3 @@ function build(srcPath, destPath, cb){
 	//fs.writeFileSync(destPath, fgMgr.genClientMeta());	
 	//cb(null);
 };
-
-exports.build = build;

@@ -1,11 +1,19 @@
 "use strict";
 
-function EventEmitter(parent){
+export interface IEventEmitter{
+	events: Object;
+	parent?: IEventEmitter;
+	on: Function;
+	emit: Function;
+	emitApply: Function;
+};
+
+export default function EventEmitter(parent?: IEventEmitter){
 	this.events = {};
 	this.parent = parent;
 };
 
-EventEmitter.prototype.on = function(name, fn){
+EventEmitter.prototype.on = function(name: string, fn: Function){
 	var eventList = this.events[name];
 	if (!eventList){
 		eventList = [];
@@ -14,7 +22,7 @@ EventEmitter.prototype.on = function(name, fn){
 	eventList.push(fn);
 };
 
-EventEmitter.prototype.emit = function(name/*, rest*/){
+EventEmitter.prototype.emit = function(name: string, ...rest){
 	if (this.parent){
 		this.parent.emit.apply(this.parent, arguments);
 	};
@@ -28,7 +36,7 @@ EventEmitter.prototype.emit = function(name/*, rest*/){
 	});
 };
 
-EventEmitter.prototype.emitApply = function(name, thisArg, args){
+EventEmitter.prototype.emitApply = function(name: string, thisArg, args: any[]){
 	if (this.parent){
 		this.parent.emitApply.apply(this.parent, arguments);
 	};
@@ -40,5 +48,3 @@ EventEmitter.prototype.emitApply = function(name, thisArg, args){
 		fn.apply(thisArg, args);
 	});
 };
-
-module.exports = EventEmitter;

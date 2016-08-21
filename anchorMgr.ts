@@ -1,12 +1,16 @@
 "use strict";
 
+import {FgInstance} from './client/fgInstance.ts';
+import {Gap} from './client/gapClassMgr.ts';
+
+type Anchor = HTMLElement;
 /**
  * Generates an id for an acnchor.
  * @param {Object} context - Fg containing the acnchor.
  * @param {Object} gap - Gap to which the acnchor is bind to.
  * @returns {string} Id of the anchor tag.
  */
-function genId(context, gap){
+function genId(context: FgInstance, gap: Gap): string{
    	var id = ['fg', context.id, 'aid', gap.gid].join('-');
     return id;
 };
@@ -17,13 +21,12 @@ function genId(context, gap){
  * @param {Object} gap - Gap to which the acnchor is bind to.
  * @returns {string} Html code of the anchor. 
  */
-function genCode(context, gap){
+export function genCode(context: FgInstance, gap: Gap): string{
     var code = '<script type="fg-js/anchor" id="' 
         + genId(context, gap) 
         + '"></script>';
     return code;
 };
-exports.genCode = genCode;
 
 /**
  * Find the anchor.
@@ -31,11 +34,10 @@ exports.genCode = genCode;
  * @param {Object} gap - Gap to which the acnchor is bind to.
  * @returns {Object} Dom element of the anchor.
  */
-function find(context, gap){
+export function find(context: FgInstance, gap: Gap): Anchor{
    	var id = genId(context, gap);    
     return document.getElementById(id);
 };
-exports.find = find;
 
 /**
  * Places some Html code next to the acnchor.
@@ -43,7 +45,7 @@ exports.find = find;
  * @param {string} position - Defines where code be placed. "after" and "before" are used relative to anchor node.
  * @param {string} html - HTML code to be placed.
  */
-function insertHTML(anchor, position, html){
+export function insertHTML(anchor: Anchor, position: string, html: string){
    	var posTable = {
            "before": "beforebegin",
            "after": "afterend"
@@ -51,4 +53,3 @@ function insertHTML(anchor, position, html){
     var pos = posTable[position];
     anchor.insertAdjacentHTML(pos, html);
 };
-exports.insertHTML = insertHTML;

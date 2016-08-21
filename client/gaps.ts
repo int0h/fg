@@ -1,4 +1,4 @@
-var gapClassMgr = require('fg-js/client/gapClassMgr.js');
+var gapClassMgr = require('fg-js/client/gapClass.js');
 gapClassMgr.regGap({
 	"name": "content",
 	"path": "../gaps/content",

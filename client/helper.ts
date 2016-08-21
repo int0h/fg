@@ -3,7 +3,11 @@ module.exports = $fg;
 var fgClassModule = require('fg-js/client/fgClass.js');
 var fgInstanceModule = require('fg-js/client/fgInstance.js');
 
-function $fg(arg){
+interface Helper {
+	(): any; 
+};
+
+var $fg = <Helper>function (arg){
 	if (arg instanceof HTMLElement){
 		return $fg.byDom(arg);
 	};
@@ -67,6 +71,6 @@ $fg.classes = fgClassModule.fgClassDict;
 
 $fg.fgs = fgInstanceModule.fgInstanceTable;
 
-$fg.jq = window.jQuery;
+$fg.jq = window['jQuery'];
 
-window.$fg = $fg;
+window['$fg'] = $fg;

@@ -1,6 +1,6 @@
 "use strict";
 
-var utils = require('fg-js/utils');
+import * as utils from './utils';
 
 /**
  * Renders template.
@@ -10,7 +10,7 @@ var utils = require('fg-js/utils');
  * @param {Object} meta - meta modifier.
  * @returns {string} result code.
  */
-function renderTpl(tpl, parent, data, meta){
+export default function renderTpl(tpl, parent, data, meta){
 	var self = this;
 	var parts = tpl.map(function(part, partId){
 		if (typeof part === "string"){
@@ -29,5 +29,3 @@ function renderTpl(tpl, parent, data, meta){
 	var code = parts.join('');
 	return code;
 };
-
-exports.renderTpl = renderTpl;

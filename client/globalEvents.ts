@@ -1,6 +1,6 @@
 var events = {};
 
-function handler(name, event){
+export function handler(name, event){
 	var elm = event.target;
 	while (elm){
 		var fg = $fg.byDom(elm);
@@ -12,10 +12,10 @@ function handler(name, event){
 	};
 };
 
-exports.listen = function(name){
+export function listen(name){
 	if (name in events){
 		return;
 	};	
 	events[name] = true;
-	document.addEventListener(name, handler.bind(null, name), {"capture": true});
+	document.addEventListener(name, handler.bind(null, name), true);
 };

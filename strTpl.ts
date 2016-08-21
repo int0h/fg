@@ -40,7 +40,7 @@ StrTpl.prototype.parse = function(tpl, valueParseFn){
 	return this;
 };
 
-function mixArrays(/*arrays*/){
+function mixArrays(...rest/*arrays*/){
 	var maxLength = 0;
 	var totalLength = 0;
 	for (var i = 0; i < arguments.length; i++){

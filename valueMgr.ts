@@ -1,6 +1,17 @@
 "use strict";
 
-var utils = require('fg-js/utils');
+import * as utils from './utils';
+
+interface IValuePathItem {
+    op: string;
+};
+
+export interface IValuePath {
+    path: Array<string>;
+	source: string;
+	escaped: boolean;
+	rawPath: Array<string | IValuePathItem>;
+};
 
 /**
  * Reads path and returns parsed path.
@@ -8,7 +19,7 @@ var utils = require('fg-js/utils');
  * @param {Object} extraInfo - data object to be added to result.
  * @returns {Object} path object.
  */
-function read(parts, extraInfo){
+export function read(parts: Array<string>, extraInfo?: Object): IValuePath{
 	var source = "data";
 	var path = parts.map(function(part){		
 		if (part[0] === '$'){
@@ -20,14 +31,15 @@ function read(parts, extraInfo){
 	});
 	var res = {
 		"source": source,
-		"path": path
+		"path": null,
+		"rawPath": path,
+		"escaped": true
 	};
 	if (extraInfo){
 		utils.extend(res, extraInfo);
 	};
 	return res;
 };
-exports.read = read;
 
 /**
  * Parses dot path and returns parsed path.
@@ -35,18 +47,17 @@ exports.read = read;
  * @param {Object} extraInfo - data object to be added to result.
  * @returns {Object} path object.
  */
-function parse(str, extraInfo){
+export function parse(str: string, extraInfo: Object): IValuePath{
 	var parts = str.trim().split('.');
 	return read(parts, extraInfo);
 };
-exports.parse = parse;
 
 /**
  * Finds the nearest scope and return its path.
  * @param {Object} meta - gap meta connected to the path.
  * @returns {Object} scope path object.
  */
-function findScopePath(meta){
+function findScopePath(meta: any){
 	var parent = meta.parent;
 	while (true){		
 		if (!parent){
@@ -65,27 +76,28 @@ function findScopePath(meta){
  * @param {Object} path - value path object.
  * @returns {Object} resolved path object.
  */
-function resolvePath(meta, path){
+export function resolvePath(meta: any, path: IValuePath): IValuePath{
 	var scopePath = findScopePath(meta);
-	var res = {
+	var res: IValuePath = {
+		path: null,
+		rawPath: path.rawPath,
 		source: "data",
 		escaped: path.escaped
 	};
 	res.path = scopePath.slice();
-	path.path.forEach(function(key){
+	path.rawPath.forEach(function(key){
 		if (typeof key === "string"){
 			res.path.push(key);			
 			return;
 		};
-		if (key.op === "root"){
+		if ((key as IValuePathItem).op === "root"){
 			res.path = [];
-		} else if (key.op === "up"){
+		} else if ((key as IValuePathItem).op === "up"){
 			res.path.pop();
 		};
 	});
 	return res;
 };
-exports.resolvePath = resolvePath;
 
 /**
  * Returns the value by given path.
@@ -94,7 +106,7 @@ exports.resolvePath = resolvePath;
  * @param {Object} valuePath - value path to be fetched.
  * @returns {any} fetched data.
  */
-function getValue(meta, data, valuePath){
+export function getValue(meta: any, data: Object, valuePath: IValuePath){
 	var sourceTable = {
 		"data": data,
 		"meta": meta
@@ -106,7 +118,6 @@ function getValue(meta, data, valuePath){
 	};
 	return res;
 };
-exports.getValue = getValue;
 
 /**
  * Returns the queried value as string.
@@ -115,10 +126,9 @@ exports.getValue = getValue;
  * @param {Object} resolvedPath - resolved path.
  * @returns {string} rendered string.
  */
-function render(meta, data, resolvedPath){
+export function render(meta: any, data: Object, resolvedPath: IValuePath){
 	return getValue(meta, data, resolvedPath).toString();
 };
-exports.render = render;
 
 /**
  * Resolve path and returns the queried value as string.
@@ -127,8 +137,7 @@ exports.render = render;
  * @param {Object} path - unresolved path.
  * @returns {string} rendered string.
  */
-function resolveAndRender(meta, data, path){
+export function resolveAndRender(meta: any, data: Object, path: IValuePath){
 	var resolvedPath = resolvePath(meta, path);
 	return render(meta, data, resolvedPath);
 };
-exports.resolveAndRender = resolveAndRender;

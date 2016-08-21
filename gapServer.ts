@@ -1,17 +1,34 @@
 "use strict";
 
-var utils = require('fg-js/utils');
-var gapTable = {};
-var path = require('path');
+import * as utils from './utils';
+import * as path from 'path';
+import {IAstNode} from './tplMgr.ts';
+import {Gap} from './client/gapClassMgr.ts';
+import {FgInstance} from './client/fgInstance.ts';
+
+var gapClassTable = {};
+
+interface IParseGap {(node: any): Gap; priority: number};
+interface IRenderGap {(context: FgInstance, data: any): string};
+interface IUpdateGap {(context: FgInstance, meta: Gap, scopePath: any, value: any, oldValue: any)};
+
+interface GapClass{
+	name: string;
+	path: string;
+	priority?: Number;
+	parse?: IParseGap;
+	render?: IRenderGap;
+	update?: IUpdateGap;
+};
 
 /**
  * Fragment Manager. Stores all parsed fg's.
  * @constructor
  */
-function regGap(gapHandler){	
-	gapHandler.priority = gapHandler.parse.priority || 0;
-	gapTable[gapHandler.name] = gapHandler;	
-	return gapHandler;
+export function regGap(gapClass: GapClass){	
+	gapClass.priority = gapClass.parse.priority || 0;
+	gapClassTable[gapClass.name] = gapClass;	
+	return gapClass;
 };
 
 /**
@@ -21,15 +38,15 @@ function regGap(gapHandler){
  * @param {object} parentMeta - Parent gap.
  * @return {gap | null}
  */
-function parse(ast, html, parentMeta){
+export function parse(ast: IAstNode, html: string, parentMeta: Gap){
 	/*var name = ast.nodeName;
 	var gap = gapTable[name];
 	if (!gap){
 		return false;
 	};*/
 	var matched = [];
-	for (var i in gapTable){
-		var gap = gapTable[i];
+	for (var i in gapClassTable){
+		var gap = gapClassTable[i];
 		var meta = gap.parse(ast, html, parentMeta);
 		if (meta){
 			matched.push({
@@ -65,8 +82,8 @@ function parse(ast, html, parentMeta){
  * @param {object} context - Fg containing the gap.
  * @return {string}
  */
-function render(data, meta, context){
-	var gap = gapTable[meta.type];
+export function render(data: Object, meta: Gap, context: FgInstance): string{
+	var gap = gapClassTable[meta.type];
 	return gap.render(data, meta, context);
 };
 
@@ -74,12 +91,12 @@ function render(data, meta, context){
  * Generates gap info for client. [deprecated]
  * @return {string}
  */
-function genClientCode(){
+export function genClientCode(): string{
 	var clientCode = "var gapClassMgr = require('./gapClassMgr.js');" 
 	+ "var renderTpl = require('fg-js/tplRender.js').renderTpl.bind(null, gapClassMgr);\n";
 	var gapCodes = [];
-	for (var i in gapTable){
-		var gap = gapTable[i];
+	for (var i in gapClassTable){
+		var gap = gapClassTable[i];
 		var propCode = [
 			'"render": ' + gap.render.toString(),			
 			'"update": ' + gap.update.toString(),			
@@ -94,14 +111,14 @@ function genClientCode(){
  * Reads gap directory and registers gaps from there.
  * @param {string} gapPath - path to the "gaps" directory.
  */
-function readGapDir(gapPath){
+export function readGapDir(gapPath){
 	var name = /\/([^\/]*)\/?$/.exec(gapPath)[1];
 	//var reqPath = './' + path.relative(path.dirname(module.filename), gapPath).replace(/\\/g, '/');
 	var clientPath = path.dirname(require.resolve('fg-js/client/main.js'));
 	var reqPath = path.relative(clientPath, gapPath).replace(/\\/g, '/');
 	var configObj = {
 		"name": name,
-		"path": reqPath,
+		"path": reqPath,		
 		"parse": require(gapPath + '/parse.js'),
 		"render": require(gapPath + '/render.js'),
 		"update": require(gapPath + '/update.js')
@@ -113,9 +130,9 @@ function readGapDir(gapPath){
  * Generates gap include file for the client.
  * @return {string}
  */
-function genIncludeFile(){
+export function genIncludeFile(): string{
 	var code = "var gapClassMgr = require('fg-js/client/gapClassMgr.js');";
-	utils.objFor(gapTable, function(gap){
+	utils.objFor(gapClassTable, function(gap){
 		code += '\ngapClassMgr.regGap({\n'
 			+ '\t"name": "' + gap.name + '",\n'
 			+ '\t"path": "' + gap.path + '",\n'
@@ -126,10 +143,3 @@ function genIncludeFile(){
 	});
 	return code;
 };
-
-exports.genIncludeFile = genIncludeFile;
-exports.readGapDir = readGapDir;
-exports.regGap = regGap;
-exports.parse = parse;
-exports.render = render;
-exports.genClientCode = genClientCode;

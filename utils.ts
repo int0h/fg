@@ -1,17 +1,15 @@
 "use strict";
 
-var tplUtils = require('fg-js/utils/tplUtils.js');
-var valueMgr = require('fg-js/valueMgr.js');
-extend(exports, tplUtils);
+import tplUtils from './utils/tplUtils.ts';
+import * as valueMgr from './valueMgr.ts';
 
-function objFor(obj, fn){
+export function objFor(obj: Object, fn: Function){
 	for (var i in obj){
 		fn(obj[i], i, obj);
 	};
 };
-exports.objFor = objFor;
 
-function objMap(obj, fn){
+export function objMap(obj: Object, fn: Function){
 	var newObj = {};
 	objFor(obj, function(item, id){
 		var newItem = fn(item, id, obj);
@@ -19,9 +17,8 @@ function objMap(obj, fn){
 	});
 	return newObj;
 };
-exports.objMap = objMap;
 
-function objPath(path, obj, newVal){
+export function objPath(path: Array<string>, obj: Object, newVal?: any){
 	if (path.length < 1){
 		if (arguments.length > 2){
 			throw 'root rewritting is not supported';
@@ -45,30 +42,24 @@ function objPath(path, obj, newVal){
 	};
 	return objPath(path.slice(1), subObj);
 };
-exports.objPath = objPath;
 
-
-function attrsToObj(attrs){
+export function attrsToObj(attrs){
 	var res = {};
 	attrs.forEach(function(i){
 		res[i.name] = i.value;
 	}); 
 	return res;
 };
-exports.attrsToObj = attrsToObj;
 
-
-function simpleClone(obj){
+export function simpleClone(obj){
 	var res = {};
 	for (var i in obj){
 		res[i] = obj[i];
 	};
 	return res;
 };
-exports.simpleClone = simpleClone;
 
-
-function mixArrays(/*arrays*/){
+export function mixArrays(/*arrays*/){
 	var id = 0;
 	var maxLength = 0;
 	var totalLength = 0;
@@ -87,9 +78,8 @@ function mixArrays(/*arrays*/){
 	};
 	return resArr;
 };
-exports.mixArrays = mixArrays;
 
-function resolvePath(rootPath, relPath){
+export function resolvePath(rootPath, relPath){
 	var resPath = rootPath.slice();
 	relPath = relPath || [];
 	relPath.forEach(function(key){
@@ -101,10 +91,8 @@ function resolvePath(rootPath, relPath){
 	});
 	return resPath;
 };
-exports.resolvePath = resolvePath;
 
-
-function getScopePath(meta){
+export function getScopePath(meta){
 	var	parentPath = [];
 	if (meta.parent){
 		parentPath = meta.parent.scopePath;
@@ -114,9 +102,8 @@ function getScopePath(meta){
 	};
 	return resolvePath(parentPath, meta.path);
 };
-exports.getScopePath = getScopePath;
 
-function keyValueToObj(arr, keyName, valueName){
+export function keyValueToObj(arr, keyName, valueName){
 	keyName = keyName || 'key';
 	valueName = valueName || 'value';
 	var res = {};
@@ -125,9 +112,8 @@ function keyValueToObj(arr, keyName, valueName){
 	}); 
 	return res;
 };
-exports.keyValueToObj = keyValueToObj;	
 
-function objToKeyValue(obj, keyName, valueName){
+export function objToKeyValue(obj, keyName, valueName){
 	keyName = keyName || 'key';
 	valueName = valueName || 'value';
 	var res = [];
@@ -139,32 +125,27 @@ function objToKeyValue(obj, keyName, valueName){
 	};
 	return res;
 };
-exports.objToKeyValue = objToKeyValue;
 
-function clone(obj){
+export function clone(obj){
 	return Object.create(obj);
 };
-exports.clone = clone;
 
-
-function concatObj(obj1, obj2){
+export function concatObj(obj1, obj2){
 	var res = simpleClone(obj1);
 	for (var i in obj2){
 		res[i] = obj2[i];
 	};
 	return res;
 };
-exports.concatObj = concatObj;
 
-function extend(dest, src){	
+export function extend(dest, src){	
 	for (var i in src){
 		dest[i] = src[i];
 	};
 	return dest;
 };
-exports.extend = extend;
 
-function findScopeHolder(meta){
+export function findScopeHolder(meta){
     var node = meta.parent;
     while (node){
         if (!node.isScopeHolder){
@@ -174,47 +155,8 @@ function findScopeHolder(meta){
     };
     throw new Error('cannot find scope holder');
 };
-exports.findScopeHolder = findScopeHolder;
 
-function renderScopeContent(context, scopeMeta, scopeData, data, idOffset){
-	var gapClassMgr = require('fg-js/client/gapClassMgr.js');
-	var isArray = Array.isArray(scopeData);
-	if (!isArray){
-		scopeData = [scopeData];
-	};
-	var parts = scopeData.map(function(dataItem, id){
-		var itemMeta = scopeMeta;
-		if (isArray){
-			var itemCfg = {
-				"type": "scope-item",
-				"isVirtual": true,
-				"path": [id + idOffset],
-				"content": scopeMeta.content
-			};
-			if (scopeMeta.eid){
-				itemCfg.eid = scopeMeta.eid + '-item';
-			};
-			itemMeta = new gapClassMgr.Gap(context, itemCfg, itemMeta);
-			context.gapStorage.setTriggers(itemMeta, [itemMeta.scopePath]);
-		};
-		return gapClassMgr.render(context, scopeMeta, data, itemMeta);
-	});
-	return parts;
-};
-exports.renderScopeContent = renderScopeContent;
-
-function insertHTMLBeforeComment(commentElm, html){
-	var prev = commentElm.previousElementSibling;
-	if (prev){
-		prev.insertAdjacentHTML('afterend', html);
-		return;
-	};
-	commentElm.parentNode.insertAdjacentHTML('afterbegin', html);
-};
-exports.insertHTMLBeforeComment = insertHTMLBeforeComment;
-
-
-function parsePath(parsedNode){
+export function parsePath(parsedNode){
 	if (parsedNode.attrs.class){
 		var parts = parsedNode.attrs.class.value.split(' ');
 		var parsed =  valueMgr.read(parts);
@@ -222,18 +164,8 @@ function parsePath(parsedNode){
 	};
 	return valueMgr.read([]);
 };
-exports.parsePath = parsePath;
 
-function objMap(obj, fn){
-	var res = {};
-	objFor(obj, function(val, id){
-		res[id] = fn(val, id, obj);
-	});
-	return res;
-};
-exports.objMap = objMap;
-
-function deepClone(obj){
+export function deepClone(obj: Object): Object{
 	if (typeof obj === "object"){
 		var map = Array.isArray(obj)
 			? obj.map.bind(obj)
@@ -242,24 +174,11 @@ function deepClone(obj){
 	};
 	return obj;
 };
-exports.deepClone = deepClone;
 
-function getAttrsPaths(attrs){
-	var paths = [];
-	objFor(attrs, function(value, name){
-		var nameTpl = new StrTpl(name);
-		var valueTpl = new StrTpl(value);
-		paths = paths.concat(nameTpl.getPaths(), valueTpl.getPaths());		
-	});
-	return paths;
-};
-exports.getAttrsPaths = getAttrsPaths;
-
-function escapeHtml(code){
+export function escapeHtml(code: string): string{
 	return code
 		.replace(/"/g,'&quot;')
 		.replace(/&/g,'&amp;')
 		.replace(/</g,'&lt;')
 		.replace(/>/g,'&gt;');
 };
-exports.escapeHtml = escapeHtml;

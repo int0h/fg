@@ -2,7 +2,7 @@
 
 var fs = require('fs');
 
-function toJs(obj, opts, tabOffest){
+export function toJs(obj, opts?, tabOffest?){
 	opts = opts || {};
 	opts.tab = opts.tab || '\t';
 	opts.n = opts.n || '\n';
@@ -46,14 +46,12 @@ function toJs(obj, opts, tabOffest){
 		return '{' + opts.n + codeParts.join(',' + opts.n) + opts.n + tabPrefix + '}';
 	};
 };
-exports.toJs = toJs;
 
-function strPrefix(prefix, str){
+export function strPrefix(prefix, str){
 	return prefix + str;
 };
-exports.strPrefix = strPrefix;
 
-function prefixLines(str, prefix, triggerFn){
+export function prefixLines(str, prefix, triggerFn){
 	var lines = str.split('\n').map(function(line, id){
 		if (!triggerFn || triggerFn(line, id, lines)){
 			return prefix + line;
@@ -62,9 +60,8 @@ function prefixLines(str, prefix, triggerFn){
 	});
 	return lines.join('\n');
 };
-exports.prefixLines = prefixLines;
 
-function fileExist(path){
+export function fileExist(path){
 	try{
 		fs.accessSync(path);
 	}catch(e){
@@ -72,27 +69,24 @@ function fileExist(path){
 	};
 	return true;
 };
-exports.fileExist = fileExist;
 
-function forTree(treeObj, childProp, fn){
+export function forTree(treeObj, childProp, fn){
 	fn(treeObj);
 	if (treeObj[childProp]){
 		treeObj[childProp].forEach(function(node){
-			forTree(node, fn);
+			forTree(node, childProp, fn);
 		});
 	};
 };
-exports.forTree = forTree;
 
-function getSubFolders(path){
+export function getSubFolders(path){
 	return fs.readdirSync(path).filter(function(subPath){
 		var stat = fs.statSync(path + '/' + subPath);
 		return stat.isDirectory();
 	});
 };
-exports.getSubFolders = getSubFolders;
 
-function treeMap(treeObj, childProp, fn){
+export function treeMap(treeObj, childProp, fn){
     var res = {};
 	res = fn(treeObj);
 	if (treeObj[childProp]){
@@ -102,4 +96,3 @@ function treeMap(treeObj, childProp, fn){
 	};
 	return res;
 };
-exports.treeMap = treeMap;

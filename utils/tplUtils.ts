@@ -1,4 +1,4 @@
-var utils = require('fg-js/utils.js');
+import utils from 'fg-js/utils.js';
 
 var selfClosingTags = ["area", "base", "br", "col", 
 	"command", "embed", "hr", "img", 
@@ -6,7 +6,7 @@ var selfClosingTags = ["area", "base", "br", "col",
 	"meta", "param", "source", "track", 
 	"wbr"];
 
-function renderTag(tagInfo){
+export default function renderTag(tagInfo){
 	var attrs = tagInfo.attrs;
 	if (!Array.isArray(attrs)){
 		attrs = utils.objToKeyValue(attrs, 'name', 'value');
@@ -26,5 +26,4 @@ function renderTag(tagInfo){
 	var code = openTag + (tagInfo.innerHTML || "") + closeTag;
 	return code;
 };
-exports.renderTag = renderTag;	
 
