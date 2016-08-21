@@ -1,5 +1,7 @@
+"use strict";
+
 function parse(node, html){
-	if (node.tagName != "content"){
+	if (node.tagName !== "content"){
 		return null;
 	};
 	var meta = {};

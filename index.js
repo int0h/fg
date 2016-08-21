@@ -1,10 +1,13 @@
+"use strict";
+
+//import {path} from 'path';
+
 var fs = require('fs');
 var path = require('path');
-var gaps = require('fg-js/gaps');
-var gapClassMgr = require('fg-js/gapClassMgr');
+var gapClassMgr = require('./gapClassMgr.js');
 var browserify = require('browserify');
-var fgMgr = require('fg-js/fgMgr.js');
-var serverUtils = require('fg-js/serverUtils');
+var FgMgr = require('./fgMgr.js');
+var serverUtils = require('./serverUtils');
 var fse = require('fs-extra');
 
 var fgLibPath = path.dirname(require.resolve('fg-js')) + '/';
@@ -22,11 +25,10 @@ function readGapDirs(path){
 	var dirs = getSubDirs(path);
 	dirs.forEach(gapClassMgr.readGapDir.bind(gapClassMgr));
 };
-
 var gapsDir = fgLibPath + '/gaps/';
 readGapDirs(gapsDir);
 
-function load(name, dirPath){	
+function load(fgMgr, name, dirPath){	
 	var sources = {
 		"tpl": null,
 		"classFn": null
@@ -47,22 +49,36 @@ function load(name, dirPath){
 	subDirs.forEach(function(subPath){
 		var childName = name + '-' + subPath;
 		var childPath = dirPath + '/' + subPath;
-		load(childName, childPath);
+		load(fgMgr, childName, childPath);
 	});
 	
 	fgMgr.readFg(name, sources);
 };
 exports.load = load;
 
-function loadDir(path){
+function loadDir(fgMgr, path){
 	var subDirs = serverUtils.getSubFolders(path);
 	subDirs.forEach(function(subPath){
 		var childName = subPath;
 		var childPath = path + '/' + subPath;
-		load(childName, childPath);
+		load(fgMgr, childName, childPath);
 	});
 };
 exports.loadDir = loadDir;
+
+function buildTest(cb){
+	var testDir = fgLibPath + 'tests/';
+	buildRuntime(testDir + '/build/runtime.js', function(err){
+		if (err){
+			cb(err);
+			return;
+		};
+		build(testDir + '/fg-src/', testDir + '/build/fg.js', function(err){
+			cb(err);
+		});
+	});
+};
+exports.buildTest = buildTest;
 
 function buildRuntime(destPath, cb){
 	var brofy = browserify({
@@ -75,7 +91,6 @@ function buildRuntime(destPath, cb){
 			console.error(err);
 			return;
 		};
-		fs.writeFileSync(fgLibPath + 'tests/runtime.js', code);
 		fs.writeFileSync(destPath, code);
 		cb(null);
 	});
@@ -97,17 +112,18 @@ var includeFgCode = `fgs.push({
 	"classFn": %classFn%
 });`;
 
-exports.build = function(srcPath, destPath, cb){
+function build(srcPath, destPath, cb){
+	var fgMgr = new FgMgr();
 	var brofy = browserify({
 		debug: true
 	});
-	loadDir(srcPath);
+	loadDir(fgMgr, srcPath);
 	//var tempPath = path.resolve(fgLibPath, './temp');	
 	var tempPath = path.resolve(process.cwd(), './temp');	
 	fse.emptyDirSync(tempPath);
 	var includeCodeParts = []; 
-	for (var i in fgMgr.fgTable){
-		var fg = fgMgr.fgTable[i];
+	for (var i in fgMgr.fgs){
+		var fg = fgMgr.fgs[i];
 		var fgPath = tempPath + '/' + fg.name;
 		fs.mkdirSync(fgPath);		
 		if (fg.classFn){
@@ -130,8 +146,8 @@ exports.build = function(srcPath, destPath, cb){
 	fs.writeFileSync(includePath, includeCode);
 	brofy.add(includePath).bundle(function(err, code){
 		if (err){
-			return;
 			console.error(err);
+			return;
 		};
 		fs.writeFileSync(destPath, code);
 		cb(null);
@@ -139,3 +155,5 @@ exports.build = function(srcPath, destPath, cb){
 	//fs.writeFileSync(destPath, fgMgr.genClientMeta());	
 	//cb(null);
 };
+
+exports.build = build;

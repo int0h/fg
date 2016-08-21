@@ -12,6 +12,12 @@ gapClassMgr.regGap({
 	"update": require("../gaps/data/update.js"),
 });
 gapClassMgr.regGap({
+	"name": "dynamic-text",
+	"path": "../gaps/dynamic-text",
+	"render": require("../gaps/dynamic-text/render.js"),
+	"update": require("../gaps/dynamic-text/update.js"),
+});
+gapClassMgr.regGap({
 	"name": "fg",
 	"path": "../gaps/fg",
 	"render": require("../gaps/fg/render.js"),

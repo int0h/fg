@@ -1,5 +1,7 @@
+"use strict";
+
 function StrTpl(tpl, valueParseFn){
-	if (typeof tpl == "object"){
+	if (typeof tpl === "object"){
 		this.src = tpl.src;
 		this.gaps = tpl.gaps;
 		this.parts = tpl.parts;
@@ -19,25 +21,26 @@ StrTpl.read = function(tpl, valueParseFn){
 	return res;
 };
 
-var gapRe = /\$\{[^\}]*\}/gm;
+var gapRe = /[\$\#\!]{1}\{[^\}]*\}/gm;
 
 StrTpl.prototype.parse = function(tpl, valueParseFn){
-	var gapStrArr = tpl.match(gapRe)
+	var gapStrArr = tpl.match(gapRe);
 	if (!gapStrArr){
 		this.isString = true;
 		this.parts = [tpl];
 		return;
 	};
-	gapStrArr = gapStrArr.map(function(part){
-		return part.slice(2, -1);
-	});	
-	this.gaps = gapStrArr.map(valueParseFn);
+	this.gaps = gapStrArr.map(function(part){
+		var partValue = part.slice(2, -1);
+		var partRes = valueParseFn(partValue);
+		partRes.escaped = part[0] !== "!";
+		return partRes;
+	});		
 	this.parts = tpl.split(gapRe);
 	return this;
 };
 
-function mixArrays(arrays){
-	var id = 0;
+function mixArrays(/*arrays*/){
 	var maxLength = 0;
 	var totalLength = 0;
 	for (var i = 0; i < arguments.length; i++){
@@ -47,9 +50,9 @@ function mixArrays(arrays){
 	var resArr = [];
 	var arrayCount = arguments.length;
 	for (var id = 0; id < maxLength; id++){				
-		for (var i = 0; i < arrayCount; i++){
-			if (arguments[i].length > id){
-				resArr.push(arguments[i][id]);
+		for (var j = 0; j < arrayCount; j++){
+			if (arguments[j].length > id){
+				resArr.push(arguments[j][id]);
 			};
 		};
 	};

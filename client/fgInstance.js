@@ -2,7 +2,7 @@
 
 var gapClassMgr = require('fg-js/client/gapClassMgr.js');
 var renderTpl = require('fg-js/tplRender.js').renderTpl;
-var EventEmitter = require('fg-js/eventEmitter.js');
+var EventEmitter = require('../eventEmitter.js');
 var utils = require('fg-js/utils.js');
 var GapStorage = require('fg-js/client/gapStorage.js').GapStorage;
 var helper = require('./helper.js');

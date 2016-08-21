@@ -1,3 +1,5 @@
+"use strict";
+
 var fs = require('fs');
 
 function toJs(obj, opts, tabOffest){
@@ -12,12 +14,12 @@ function toJs(obj, opts, tabOffest){
 	if (obj === null){
 		return "null";
 	};
-	if (~["string", "number", "boolean"].indexOf(typeof obj)){
+	if (["string", "number", "boolean"].indexOf(typeof obj) >= 0){
 		return JSON.stringify(obj);
 	};
-	if (typeof obj == "function"){
+	if (typeof obj === "function"){
 		var code = obj.toString();
-		lines = code
+		var lines = code
 			.split(opts.n);
 		code = lines.slice(0, 1).concat(
 			lines.slice(1)
@@ -26,19 +28,20 @@ function toJs(obj, opts, tabOffest){
 			.join(opts.n);
 		return code;
 	};
-	if (typeof obj == "object"){
+	if (typeof obj === "object"){
+		var codeParts;
 		if (Array.isArray(obj)){
-			var codeParts = obj.map(function(val){
+			codeParts = obj.map(function(val){
 				return tabPrefix + opts.tab + toJs(val, opts, tabOffest + 1);
 			});
 			return '[' + opts.n + codeParts.join(',' + opts.n) + opts.n + tabPrefix + ']';
 		};
-		var codeParts = [];
-		for (var i in obj){
-			if (obj[i] === undefined){
+		codeParts = [];
+		for (var key in obj){
+			if (obj[key] === undefined){
 				continue;
 			};
-			codeParts.push(tabPrefix + opts.tab + '"' + i + '": ' + toJs(obj[i], opts, tabOffest + 1));
+			codeParts.push(tabPrefix + opts.tab + '"' + key + '": ' + toJs(obj[key], opts, tabOffest + 1));
 		};		
 		return '{' + opts.n + codeParts.join(',' + opts.n) + opts.n + tabPrefix + '}';
 	};
@@ -57,7 +60,7 @@ function prefixLines(str, prefix, triggerFn){
 		};
 		return line;
 	});
-	return lines.join('\n')
+	return lines.join('\n');
 };
 exports.prefixLines = prefixLines;
 

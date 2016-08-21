@@ -1,3 +1,5 @@
+"use strict";
+
 var valueMgr = require('fg-js/valueMgr');
 var utils = require('fg-js/utils');
 

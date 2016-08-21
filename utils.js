@@ -1,3 +1,5 @@
+"use strict";
+
 var tplUtils = require('fg-js/utils/tplUtils.js');
 var valueMgr = require('fg-js/valueMgr.js');
 extend(exports, tplUtils);
@@ -27,7 +29,7 @@ function objPath(path, obj, newVal){
 		return obj;
 	};
 	var propName = path[0];
-	if (path.length == 1){
+	if (path.length === 1){
 		if (arguments.length > 2){
 			obj[propName] = newVal; 
 		};				
@@ -66,7 +68,7 @@ function simpleClone(obj){
 exports.simpleClone = simpleClone;
 
 
-function mixArrays(arrays){
+function mixArrays(/*arrays*/){
 	var id = 0;
 	var maxLength = 0;
 	var totalLength = 0;
@@ -91,7 +93,7 @@ function resolvePath(rootPath, relPath){
 	var resPath = rootPath.slice();
 	relPath = relPath || [];
 	relPath.forEach(function(key){
-		if (key == "_root"){
+		if (key === "_root"){
 			resPath = [];
 			return;
 		};
@@ -110,7 +112,7 @@ function getScopePath(meta){
 			throw new Error("Parent elm must have scopePath");
 		};
 	};
-	return resolvePath(parentPath, meta.path)
+	return resolvePath(parentPath, meta.path);
 };
 exports.getScopePath = getScopePath;
 
@@ -165,12 +167,12 @@ exports.extend = extend;
 function findScopeHolder(meta){
     var node = meta.parent;
     while (node){
-        if (node.isScopeHolder){
+        if (!node.isScopeHolder){
             return node;
         };
         node = node.parent;  
     };
-    throw 'cannot find scope holder';
+    throw new Error('cannot find scope holder');
 };
 exports.findScopeHolder = findScopeHolder;
 
@@ -232,7 +234,7 @@ function objMap(obj, fn){
 exports.objMap = objMap;
 
 function deepClone(obj){
-	if (typeof obj == "object"){
+	if (typeof obj === "object"){
 		var map = Array.isArray(obj)
 			? obj.map.bind(obj)
 			: objMap.bind(null, obj);
@@ -252,3 +254,12 @@ function getAttrsPaths(attrs){
 	return paths;
 };
 exports.getAttrsPaths = getAttrsPaths;
+
+function escapeHtml(code){
+	return code
+		.replace(/"/g,'&quot;')
+		.replace(/&/g,'&amp;')
+		.replace(/</g,'&lt;')
+		.replace(/>/g,'&gt;');
+};
+exports.escapeHtml = escapeHtml;

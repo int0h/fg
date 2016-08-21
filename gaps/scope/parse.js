@@ -1,8 +1,10 @@
+"use strict";
+
 var utils = require('fg-js/utils');
 var tplMgr = require('fg-js/tplMgr.js');
 
 function parse(node, html){
-	if (node.tagName != "scope"){
+	if (node.tagName !== "scope"){
 		return null;
 	};
 	var meta = {};
