@@ -1,0 +1,31 @@
+import { FgInstance } from './fgInstance';
+import { IValuePath } from '../valueMgr';
+import { GapClass } from '../gapServer';
+import { Tpl } from '../tplMgr';
+export declare function regGap(gapHandler: GapClass): GapClass;
+export declare class Gap {
+    type: string;
+    children: Gap[];
+    parent: Gap;
+    root: Gap;
+    context: FgInstance;
+    path: IValuePath;
+    resolvedPath: IValuePath;
+    eid: number;
+    gid: number;
+    scopePath: IValuePath;
+    isVirtual: boolean;
+    fg: FgInstance;
+    storageId: number;
+    attrs: any;
+    content: Tpl;
+    currentScopeHolder: Gap;
+    constructor(context: any, parsedMeta?: any, parent?: any);
+    closest(selector: any): Gap;
+    data(val: any): any;
+    findRealDown(): any[];
+    getDom(): any[];
+    removeDom(): void;
+}
+export declare function render(context: any, parent: any, data: any, meta: any): any;
+export declare function update(context: any, gapMeta: any, scopePath: any, value: any, oldValue: any): any;
