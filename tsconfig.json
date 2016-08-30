@@ -16,12 +16,12 @@
 {
     "compilerOptions": {
         "target": "es5",
-        "module": "commonjs",
-        "outDir": "./build/",
+        "outDir": "../build/",
         "declaration": true,
         "inlineSourceMap": true
     },
     "exclude": [
-        "src/node_modules"
+        "src/node_modules",
+        "build"
     ]
 }
