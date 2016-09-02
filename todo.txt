@@ -1,4 +1,4 @@
-- path parsing
++ path parsing
 - dataset?
 - data access standardization
 - triggers? too complex
@@ -6,4 +6,6 @@
 - tests
 - class modifications
 + typescripted!
-- why GapClass != FgClass
+- why GapClass != FgClass?
+- for if etc sugar
+- fg class reconsidering (remove fgProto)
