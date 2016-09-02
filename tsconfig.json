@@ -26,6 +26,7 @@
         "./src/node_modules",
         "./build/node_modules",
         "node_modules",
-        "build"
+        "build",
+        "temp"
     ]
 }

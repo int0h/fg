@@ -1,0 +1,13 @@
+//- Equal syntax
+div= val
+//- Interpolation
+div
+    |#{val}
+//- Interpolation inside string
+div Hello #{val}!
+//- Interpolation repeated
+div Hello #{val}! #{val} is great! I'd like to live in #{val}!
+//- Multiline block Interpolation
+div.
+    I'm the creator of the #{val}!
+    Hello #{val}!
