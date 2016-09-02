@@ -5,3 +5,5 @@
 - data transform
 - tests
 - class modifications
++ typescripted!
+- why GapClass != FgClass

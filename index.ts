@@ -7,12 +7,12 @@ import * as fse from 'fs-extra';
 import * as path from 'path';
 import * as gapClassMgr from './gapServer';
 import * as browserify from 'browserify';
-var tsify = require('tsify');
+const tsify = require('tsify');
 import * as ts from 'typescript';
-import {FgMgr} from './fgMgr';
+import {FgMgr, IFgDeclaration} from './fgMgr';
 import * as serverUtils from './serverUtils';
 
-var fgLibPath = path.dirname(require.resolve('fg-js')) + '/';
+const fgLibPath = path.dirname(require.resolve('fg-js')) + '/';
 
 function getSubDirs(srcpath: string): string[]{
 	return fs.readdirSync(srcpath).filter(function(file) {
@@ -25,26 +25,23 @@ function getSubDirs(srcpath: string): string[]{
 //readGapDirs(gapsDir);
 
 export function load(fgMgr: FgMgr, name: string, dirPath: string){	
-	var sources = {
-		"tpl": null,
-		"classFn": null
-	};
-	var jadePath = dirPath + '/tpl.jade';
+	let sources: IFgDeclaration = {} as IFgDeclaration;
+	const jadePath = dirPath + '/tpl.jade';
 	if (serverUtils.fileExist(jadePath)){
-		var jadeCode = fs.readFileSync(jadePath).toString();		
+		const jadeCode = fs.readFileSync(jadePath).toString();		
 		sources.tpl = jadeCode;
 	};
-	var classJsPath = dirPath + '/class.js';
+	const classJsPath = dirPath + '/class.js';
 	if (serverUtils.fileExist(classJsPath)){
-		var code = fs.readFileSync(classJsPath).toString();
+		const code = fs.readFileSync(classJsPath).toString();
 		sources.classFn = code;
 	};
 
-	var subDirs = serverUtils.getSubFolders(dirPath);
+	const subDirs = serverUtils.getSubFolders(dirPath);
 
-	subDirs.forEach(function(subPath){
-		var childName = name + '-' + subPath;
-		var childPath = dirPath + '/' + subPath;
+	subDirs.forEach(function(subPath: string){
+		const childName = name + '-' + subPath;
+		const childPath = dirPath + '/' + subPath;
 		load(fgMgr, childName, childPath);
 	});
 	
@@ -52,22 +49,22 @@ export function load(fgMgr: FgMgr, name: string, dirPath: string){
 };
 
 export function loadDir(fgMgr: FgMgr, path: string){
-	var subDirs = serverUtils.getSubFolders(path);
-	subDirs.forEach(function(subPath){
-		var childName = subPath;
-		var childPath = path + '/' + subPath;
+	const subDirs = serverUtils.getSubFolders(path);
+	subDirs.forEach(function(subPath: string){
+		const childName = subPath;
+		const childPath = path + '/' + subPath;
 		load(fgMgr, childName, childPath);
 	});
 };
 
 export function buildTest(cb: Function){
-	var testDir = fgLibPath + '/tests/';
-	buildRuntime(testDir + '/build/runtime.js', function(err){
+	const testDir = fgLibPath + '/tests/';
+	buildRuntime(testDir + '/build/runtime.js', function(err: Error){
 		if (err){
 			cb(err);
 			return;
 		};
-		build(testDir + '/fg-src/', testDir + '/build/fg.js', function(err){
+		build(testDir + '/fg-src/', testDir + '/build/fg.js', function(err: Error){
 			cb(err);
 		});
 	});
@@ -75,13 +72,13 @@ export function buildTest(cb: Function){
 
 
 export function buildRuntime(destPath: string, cb: Function){
-	var brofy = browserify({
+	const brofy = browserify({
 		debug: true
 	});
 	brofy
 		.add(fgLibPath + '/../src/client/main.ts')
 		.plugin(tsify)
-		.bundle(function(err, code){
+		.bundle(function(err: any, code: Buffer){
 			if (err){
 				console.error(err);
 				return;
@@ -91,7 +88,7 @@ export function buildRuntime(destPath: string, cb: Function){
 		});
 };
 
-var includeWrap = [
+const includeWrap = [
 `var fgs = [];
 
 `,
@@ -100,28 +97,28 @@ var includeWrap = [
 $fg.load(fgs);`
 ];
 
-var includeFgCode = `fgs.push({
+const includeFgCode = `fgs.push({
 	"name": "%name%",
 	"tpl": %tpl%,
 	"classFn": %classFn%
 });`;
 
 export function build(srcPath: string, destPath: string, cb: Function){
-	var fgMgr = new FgMgr();
+	const fgMgr = new FgMgr();
 	loadDir(fgMgr, srcPath);
 	//var tempPath = path.resolve(fgLibPath, './temp');	
-	var tempPath = path.resolve(process.cwd(), './temp');	
+	const tempPath = path.resolve(process.cwd(), './temp');	
 	fse.emptyDirSync(tempPath);
-	var includeCodeParts = []; 
-	for (var i in fgMgr.fgs){
-		var fg = fgMgr.fgs[i];
-		var fgPath = tempPath + '/' + fg.name;
+	let includeCodeParts: string[] = []; 
+	for (let i in fgMgr.fgs){
+		const fg = fgMgr.fgs[i];
+		const fgPath = tempPath + '/' + fg.name;
 		fs.mkdirSync(fgPath);		
 		if (fg.classFn){
-			var classCode = 'module.exports = ' + fg.classFn.toString();
+			const classCode = 'module.exports = ' + fg.classFn.toString();
 			fs.writeFileSync(fgPath + '/class.js', classCode);
 		};
-		var tplCode = 'module.exports = ' + serverUtils.toJs(fg.tpl);	
+		const tplCode = 'module.exports = ' + serverUtils.toJs(fg.tpl);	
 		fs.writeFileSync(fgPath + '/tpl.js', tplCode);
 		includeCodeParts.push(includeFgCode
 			.replace('%name%', fg.name)
@@ -132,9 +129,22 @@ export function build(srcPath: string, destPath: string, cb: Function){
 				)
 			);		
 	};
-	var includeCode = includeWrap.join(includeCodeParts.join('\n'));
-	var includePath = tempPath + '/' + 'include.js';
+	const includeCode = includeWrap.join(includeCodeParts.join('\n'));
+	const includePath = tempPath + '/' + 'include.js';
 	fs.writeFileSync(includePath, includeCode);
+	const brofy = browserify({
+		debug: true
+	});
+	brofy
+		.plugin(tsify)	
+		.add(includePath).bundle(function(err: any, code: Buffer){
+			if (err){
+				console.error(err);
+				return;
+			};
+			fs.writeFileSync(destPath, code);
+			cb(null);
+		});
 	ts.transpileModule(includeCode, {
 		compilerOptions: {
 			module: ts.ModuleKind.System,

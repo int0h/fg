@@ -1,12 +1,18 @@
 "use strict";
 
 import * as tplMgr from './tplMgr';
-var microJade = require('micro-jade');
+const microJade = require('micro-jade');
 
 export interface IFgObject{
 	name: string;
-	tpl: any;
+	tpl: tplMgr.Tpl;
 	classFn: Function;
+};
+
+export interface IFgDeclaration{
+	name: string;
+	tpl: string;
+	classFn: string;
 };
 
 export interface IFgTable{
@@ -30,13 +36,13 @@ export class FgMgr{
 	 * @param {string} name - Name of fg.
 	 * @param {object} sources - Sources for fg like tpl or logic files.
 	 */
-	readFg(name, sources){
-		var jadeCode = sources.tpl;
-		var mjAst = microJade.parse(jadeCode);
-		var tpl = tplMgr.readTpl(mjAst);
-		var classFn;
+	readFg(name: string, sources: IFgDeclaration){
+		const jadeCode = sources.tpl;
+		const mjAst = microJade.parse(jadeCode);
+		const tpl = tplMgr.readTpl(mjAst);
+		let classFn: Function;
 		if (sources.classFn){
-			var code = sources.classFn;
+			const code = sources.classFn;
 			classFn = new Function('fgClass', 'fgProto', code);
 		};
 		this.fgs[name] = {

@@ -18,7 +18,9 @@
         "target": "es5",
         "outDir": "../build/",
         "declaration": true,
-        "inlineSourceMap": true
+        "inlineSourceMap": true,
+        "noImplicitAny": true,
+        "allowJs": true
     },
     "exclude": [
         "src/node_modules",

@@ -6,19 +6,20 @@ import {Gap, render} from '../client/gapClassMgr';
 import {FgInstance} from '../client/fgInstance';  
 import {IAstNode, readTpl} from '../tplMgr';
 import * as anchorMgr from '../anchorMgr';
+import GScopeItem from './scope-item';
 
 function renderScopeContent(context: FgInstance, scopeMeta: Gap, scopeData: any, data: any, idOffset: number){
-	var isArray = Array.isArray(scopeData);
+	const isArray = Array.isArray(scopeData);
 	if (!isArray){
 		scopeData = [scopeData];
 	};
-	var parts = scopeData.map(function(dataItem, id){
-		var itemMeta = scopeMeta;
-		var path = isArray
+	const parts = scopeData.map(function(dataItem: any, id: number){
+		let itemMeta = scopeMeta;
+		const path = isArray
 			? valueMgr.read([(id + idOffset).toString()])
 			: valueMgr.read([]);
-		var itemCfg: any = {
-			"type": "scope-item",
+		let itemCfg: any = {
+			"type": "scopeItem",
 			"isVirtual": true,
 			"path": path,
 			"content": scopeMeta.content
@@ -26,8 +27,8 @@ function renderScopeContent(context: FgInstance, scopeMeta: Gap, scopeData: any,
 		if (scopeMeta.eid){
 			itemCfg.eid = scopeMeta.eid + '-item';
 		};
-		itemMeta = new Gap(context, itemCfg, itemMeta);		
-		return render(context, scopeMeta, data, itemMeta);
+		itemMeta = new GScopeItem(context, itemCfg, itemMeta);		
+		return itemMeta.render(context, data);
 	});
 	return parts;
 };
@@ -35,12 +36,13 @@ function renderScopeContent(context: FgInstance, scopeMeta: Gap, scopeData: any,
 export default class GScope extends Gap{
 	items: Gap[];
 	scopePath: any;
+	type: string = "scope";
 
-	static parse(node: IAstNode, html){
+	static parse(node: IAstNode, html: string): Gap{
 		if (node.tagName !== "scope"){
 			return null;
 		};
-		var meta: GScope;
+		const meta: GScope = {} as GScope;
 		meta.type = "scope";
 		meta.isVirtual = true;
 		meta.path = utils.parsePath(node);		
@@ -49,26 +51,26 @@ export default class GScope extends Gap{
 		return meta;
 	};
 
-	render(context: FgInstance, data: any){
-		var meta = this;
+	render(context: FgInstance, data: any): string{
+		const meta = this;
 		meta.items = [];
-		var scopeData = valueMgr.getValue(meta, data, this.resolvedPath);
+		const scopeData = valueMgr.getValue(meta, data, this.resolvedPath);
 		this.scopePath = this.resolvedPath.path;
-		var anchorCode = anchorMgr.genCode(context, meta);		
-		var parts = renderScopeContent(context, meta, scopeData, data, 0);	
+		const anchorCode = anchorMgr.genCode(context, meta);		
+		const parts = renderScopeContent(context, meta, scopeData, data, 0);	
 		return parts.join('\n') + anchorCode;
 	};
 
 	update(context: FgInstance, meta: Gap, scopePath: any, value: any, oldValue: any){
 		value = value || [];
 		oldValue = oldValue || [];
-		for (var i = value.length; i < oldValue.length; i++){
+		for (let i = value.length; i < oldValue.length; i++){
 			context.gapStorage.removeScope(scopePath.concat([i]));
 		};
 		if (value.length > oldValue.length){
-			var dataSlice = value.slice(oldValue.length);
-			var newContent = renderScopeContent(context, meta, dataSlice, context.data, oldValue.length).join('\n');
-			var anchor = anchorMgr.find(context, meta);		
+			const dataSlice = value.slice(oldValue.length);
+			const newContent = renderScopeContent(context, meta, dataSlice, context.data, oldValue.length).join('\n');
+			const anchor = anchorMgr.find(context, meta);		
 			anchorMgr.insertHTML(anchor, 'before', newContent);
 		};
 	};

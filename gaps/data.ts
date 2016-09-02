@@ -8,12 +8,14 @@ import {IAstNode} from '../tplMgr';
 
 export default class GData extends Gap{
 
+	type: string = "data";
+
 	static parse(node: IAstNode){
 		if (node.tagName != "data"){
 			return null;
 		};
-		var meta: GData;
-		meta.type = "data";		
+		var meta: GData = {} as GData;
+		meta.type = "data";
 		meta.isVirtual = false;
 		meta.path = utils.parsePath(node);		
 		meta.eid = node.attrs.id || null;

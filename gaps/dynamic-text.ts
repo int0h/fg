@@ -6,10 +6,12 @@ import {StrTpl, read as readTpl} from '../StrTpl';
 import {Gap, render} from '../client/gapClassMgr';  
 import {FgInstance} from '../client/fgInstance';  
 import {IAstNode} from '../tplMgr';
+import GData from './data';
 
 export default class GDynamicText extends Gap{
 
 	tpl: any;
+	type: string = "dynamicText";
 
 	static parse(node: IAstNode){
 		if (node.type !== "text"){
@@ -19,8 +21,8 @@ export default class GDynamicText extends Gap{
 		if (typeof tpl === "string"){
 			return null;
 		};
-		var meta: GDynamicText;
-		meta.type = "dynamic-text";
+		var meta: GDynamicText = {} as GDynamicText;
+		meta.type = "dynamicText";
 		meta.tpl = tpl; 
 		return meta;
 	};
@@ -33,8 +35,8 @@ export default class GDynamicText extends Gap{
 				"type": "data",
 				"path": path			
 			};
-			var itemMeta = new Gap(context, dataMeta, meta.parent);
-			return render(context, meta.parent, data, itemMeta);
+			var itemMeta = new GData(context, dataMeta, meta.parent);
+			return itemMeta.render(context, data);
 		});
 	};
 

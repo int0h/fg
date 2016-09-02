@@ -6,24 +6,35 @@ var selfClosingTags = ["area", "base", "br", "col",
 	"meta", "param", "source", "track", 
 	"wbr"];
 
-export function renderTag(tagInfo){
-	var attrs = tagInfo.attrs;
+interface IAttr{
+	name: string;
+	value: string;
+};
+
+export interface ITagOpts{
+	attrs: any;
+	name: string;
+	innerHTML: string;
+};
+
+export function renderTag(tagInfo: ITagOpts): string{
+	let attrs = tagInfo.attrs;
 	if (!Array.isArray(attrs)){
 		attrs = utils.objToKeyValue(attrs, 'name', 'value');
 	};
-	var attrCode = "";
+	let attrCode = "";
 	if (attrs.length > 0){
-	    attrCode = " " + attrs.map(function(attr){
+	    attrCode = " " + attrs.map(function(attr: IAttr){
 		  return attr.name + '="' + attr.value + '"';
 	   }).join(' ');
 	};
-	var tagHead = tagInfo.name + attrCode;
+	const tagHead = tagInfo.name + attrCode;
 	if (~selfClosingTags.indexOf(tagInfo.name)){
 		return "<" + tagHead + " />";
 	};
-	var openTag = "<" + tagHead + ">";
-	var closeTag = "</" + tagInfo.name + ">";
-	var code = openTag + (tagInfo.innerHTML || "") + closeTag;
+	const openTag = "<" + tagHead + ">";
+	const closeTag = "</" + tagInfo.name + ">";
+	const code = openTag + (tagInfo.innerHTML || "") + closeTag;
 	return code;
 };
 

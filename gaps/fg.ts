@@ -9,13 +9,14 @@ import {IAstNode, readTpl} from '../tplMgr';
 export default class GFg extends Gap{
 	parentFg: FgInstance;
 	fgName: string;
+	type: string = "fg";
 
 	static parse(node: IAstNode){
 		if (node.type != 'tag' || !~node.tagName.indexOf("fg-")){
 			return null;
 		};
-		var meta:GFg;
-		meta.type = "fg";		
+		var meta:GFg = {} as GFg;
+		meta.type = "fg";
 		meta.isVirtual = true;
 		meta.fgName = node.tagName.slice(3);
 		meta.path = utils.parsePath(node);		
@@ -28,10 +29,11 @@ export default class GFg extends Gap{
 		var self = this;
 		this.parentFg = context;
 		//this.renderedContent = context.renderTpl(this.content, meta, data);
-		var fgClass = window['$fg'].classes[this.fgName];
+		const win: any = window;
+		var fgClass = win['$fg'].classes[this.fgName];
 		var fgData = utils.deepClone(valueMgr.getValue(this, data, this.resolvedPath));	
 		var fg = fgClass.render(fgData, this, context);
-		fg.on('update', function(path, val){
+		fg.on('update', function(path: any, val: any){
 			//context.update(scopePath.concat(path), val);
 			//console.log(path, val);
 		});

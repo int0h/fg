@@ -5,7 +5,7 @@ import * as path from 'path';
 import {IAstNode} from './tplMgr';
 import {Gap} from './client/gapClassMgr';
 import {FgInstance} from './client/fgInstance';
-import * as gaps from './gaps';
+import {default as gaps} from './gaps';
 
 /**
  * Reads the given ast and returns gap tree.
@@ -14,16 +14,21 @@ import * as gaps from './gaps';
  * @param {object} parentMeta - Parent gap.
  * @return {gap | null}
  */
+export interface IGapMatch{
+	gap: any;
+	meta: any;
+};
+
 export function parse(ast: IAstNode, html: string, parentMeta: Gap){
 	/*var name = ast.nodeName;
 	var gap = gapTable[name];
 	if (!gap){
 		return false;
 	};*/
-	var matched = [];
-	for (var i in gaps){
-		var gap = gaps[i];
-		var meta = gap.parse(ast, html, parentMeta);
+	let matched: IGapMatch[] = [];
+	for (let i in gaps){
+		const gap: typeof Gap = gaps[i];
+		const meta = gap.parse(ast, html, parentMeta);
 		if (meta){
 			matched.push({
 				"gap": gap,
@@ -32,11 +37,11 @@ export function parse(ast: IAstNode, html: string, parentMeta: Gap){
 		};
 	};
 	if (matched.length > 1){
-		var maxPrior = Math.max.apply(Math, matched.map(function(item){
-			return item.gap.priority;
+		const maxPrior = Math.max.apply(Math, matched.map(function(item){
+			return item.gap.priority || 0;
 		}));		
 		matched = matched.filter(function(item){
-			return item.gap.priority === maxPrior;
+			return (item.gap.priority || 0) === maxPrior;
 		});	
 	}
 	if (matched.length === 1){
@@ -49,16 +54,4 @@ export function parse(ast: IAstNode, html: string, parentMeta: Gap){
 		throw new Error("Gap parsing conflict");
 	};
 	return null;
-};
-
-/**
- * Renders a gap type according to parsed meta.
- * @param {object} data - Data for gap.
- * @param {object} meta - Meta for gap.
- * @param {object} context - Fg containing the gap.
- * @return {string}
- */
-export function render(data: Object, meta: Gap, context: FgInstance): string{
-	var gap = gaps[meta.type];
-	return gap.render(data, meta, context);
 };

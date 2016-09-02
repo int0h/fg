@@ -7,7 +7,7 @@ import {Gap} from '../client/gapClassMgr';
 import {FgInstance} from '../client/fgInstance';  
 import {IAstNode, readTpl} from '../tplMgr';
 
-function isScope(item){
+function isScope(item: Gap){
 	if (typeof item === "string"){
 		return false;
 	};
@@ -19,13 +19,15 @@ export default class GRaw extends Gap{
 	isScopeItem: boolean;
 	isScopeHolder: boolean;
 	tagName: string;
+	type: string = "raw";
+	static priority: number = -1;
 
-	static parse(node: IAstNode, html: string, parentMeta: Gap){
+	static parse(node: IAstNode, html?: string, parentMeta?: Gap){
 		if (node.type !== "tag"){
 			return null;
 		};
-		var hasDynamicAttrs = false;
-		var meta: GRaw;
+		let hasDynamicAttrs = false;
+		const meta: GRaw = {} as GRaw;
 		meta.type = "raw";
 		meta.isVirtual = false;
 		meta.isRootNode = node.parent.type !== "tag";
@@ -34,13 +36,13 @@ export default class GRaw extends Gap{
 			meta.eid = node.attrs.id.value;
 			delete node.attrs.id;
 		};
-		var attrsArr = utils.objToKeyValue(node.attrs, 'name', 'value');
+		let attrsArr = utils.objToKeyValue(node.attrs, 'name', 'value');
 		attrsArr = attrsArr.map(function(attr){	
-			var attrVal = attr.value.type === "string"
+			const attrVal = attr.value.type === "string"
 				? attr.value.value
 				: (attr.value.escaped ? '#' : '!') + '{' + attr.value.key + '}';		
-			var value = readStrTpl(attrVal, valueMgr.parse);
-			var name = readStrTpl(attr.name, valueMgr.parse);
+			const value = readStrTpl(attrVal, valueMgr.parse);
+			const name = readStrTpl(attr.name, valueMgr.parse);
 			if (typeof value !== "string" || typeof name !== "string"){
 				hasDynamicAttrs = true;
 			};
@@ -75,22 +77,22 @@ export default class GRaw extends Gap{
 		return meta;
 	};
 
-	render(context: FgInstance, data: any){
-		var meta = this;
+	render(context: FgInstance, data: any): string{
+		const meta = this;
 		if (meta.isScopeHolder){
 			meta.root.currentScopeHolder = meta;		
 		};
-		var attrsArr = utils.objToKeyValue(meta.attrs, 'name', 'value');
-		var attrObj = {};
+		const attrsArr = utils.objToKeyValue(meta.attrs, 'name', 'value');
+		let attrObj: any = {};
 		attrsArr.forEach(function(attr){
-			var name = new StrTpl(attr.name).render(valueMgr.resolveAndRender.bind(null, meta, data));
-			var value = new StrTpl(attr.value).render(valueMgr.resolveAndRender.bind(null, meta, data));
+			const name = new StrTpl(attr.name).render(valueMgr.resolveAndRender.bind(null, meta, data));
+			const value = new StrTpl(attr.value).render(valueMgr.resolveAndRender.bind(null, meta, data));
 			attrObj[name] = value;
 		});
-		var triggers = [];
+		let triggers: string[][] = [];
 		context.gapStorage.setTriggers(meta, triggers);
-		var inner = meta.path 
-			? valueMgr.getValue(meta, data, this.resolvedPath)
+		const inner = meta.path 
+			? valueMgr.render(meta, data, this.resolvedPath)
 			: context.renderTpl(meta.content, meta, data);
 		return utils.renderTag({
 			"name": meta.tagName,
@@ -103,24 +105,24 @@ export default class GRaw extends Gap{
 		// to do value update
 		/*var attrData = utils.objPath(meta.scopePath, context.data);
 		var renderedAttrs = utils.renderAttrs(meta.attrs, attrData);*/
-		var attrsArr = utils.objToKeyValue(meta.attrs, 'name', 'value');
-		var attrObj = {};
+		const attrsArr = utils.objToKeyValue(meta.attrs, 'name', 'value');
+		let attrObj: any = {};
 		attrsArr.forEach(function(attr){
-			var name = new StrTpl(attr.name).render(valueMgr.render.bind(null, meta, context.data));
-			var value = new StrTpl(attr.value).render(function(path){
-				var resolvedPath = valueMgr.resolvePath(meta, path);		
+			const name = new StrTpl(attr.name).render(valueMgr.render.bind(null, meta, context.data));
+			const value = new StrTpl(attr.value).render(function(path){
+				const resolvedPath = valueMgr.resolvePath(meta, path);		
 				return valueMgr.render(meta, context.data, resolvedPath);
 			});
 			attrObj[name] = value;
 		});
-		var dom = meta.getDom()[0];
+		const dom = meta.getDom()[0];
 		if (meta.path && meta.path.path.join('-') === scopePath.join('-')){
 			dom.innerHTML = meta.path.escaped 
 				? utils.escapeHtml(value)
 				: value;
 		};
-		utils.objFor(attrObj, function(value, name){
-			var oldVal = dom.getAttribute(name);
+		utils.objFor(attrObj, function(value: string, name: string){
+			const oldVal = dom.getAttribute(name);
 			if (oldVal !== value){
 				dom.setAttribute(name, value);
 			};

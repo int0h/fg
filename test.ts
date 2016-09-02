@@ -1,2 +1,3 @@
 import * as fg from "./index";
-fg.buildRuntime('../runtime.js', i=>console.log(i));
+fg.buildTest((i: any)=>console.log(i || 'finished!'));
+console.log('loading');

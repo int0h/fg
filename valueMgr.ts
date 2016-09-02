@@ -2,15 +2,12 @@
 
 import * as utils from './utils';
 
-export interface IValuePathItem {
-    op: string;
-};
+export type IValuePathItem = string;
 
 export interface IValuePath {
-    path: Array<string>;
+    path: Array<IValuePathItem>;
 	source: string;
 	escaped: boolean;
-	rawPath: Array<string | IValuePathItem>;
 };
 
 /**
@@ -20,19 +17,18 @@ export interface IValuePath {
  * @returns {Object} path object.
  */
 export function read(parts: Array<string>, extraInfo?: Object): IValuePath{
-	var source = "data";
-	var path = parts.map(function(part){		
-		if (part[0] === '$'){
-			return {
-				op: part.slice(1)
-			};
-		};
+	let source = "data";
+	let path = parts.map(function(part){		
+		// if (part[0] === '$'){
+		// 	return {
+		// 		op: part.slice(1)
+		// 	};
+		// };
 		return part; 
 	});
-	var res = {
+	const res: IValuePath = {
 		"source": source,
-		"path": null,
-		"rawPath": path,
+		"path": path,
 		"escaped": true
 	};
 	if (extraInfo){
@@ -48,7 +44,7 @@ export function read(parts: Array<string>, extraInfo?: Object): IValuePath{
  * @returns {Object} path object.
  */
 export function parse(str: string, extraInfo?: Object): IValuePath{
-	var parts = str.trim().split('.');
+	const parts = str.trim().split('.');
 	return read(parts, extraInfo);
 };
 
@@ -58,7 +54,7 @@ export function parse(str: string, extraInfo?: Object): IValuePath{
  * @returns {Object} scope path object.
  */
 function findScopePath(meta: any){
-	var parent = meta.parent;
+	let parent = meta.parent;
 	while (true){		
 		if (!parent){
 			return [];
@@ -77,22 +73,21 @@ function findScopePath(meta: any){
  * @returns {Object} resolved path object.
  */
 export function resolvePath(meta: any, path: IValuePath): IValuePath{
-	var scopePath = findScopePath(meta);
-	var res: IValuePath = {
+	const scopePath = findScopePath(meta);
+	let res: IValuePath = {
 		path: null,
-		rawPath: path.rawPath,
 		source: "data",
 		escaped: path.escaped
 	};
 	res.path = scopePath.slice();
-	path.rawPath.forEach(function(key){
-		if (typeof key === "string"){
+	path.path.forEach(function(key){
+		if (typeof key[0] !== "$"){
 			res.path.push(key);			
 			return;
 		};
-		if ((key as IValuePathItem).op === "root"){
+		if (key === "$root"){
 			res.path = [];
-		} else if ((key as IValuePathItem).op === "up"){
+		} else if (key === "$up"){
 			res.path.pop();
 		};
 	});
@@ -106,16 +101,13 @@ export function resolvePath(meta: any, path: IValuePath): IValuePath{
  * @param {Object} valuePath - value path to be fetched.
  * @returns {any} fetched data.
  */
-export function getValue(meta: any, data: Object, valuePath: IValuePath){
-	var sourceTable = {
+export function getValue(meta: any, data: Object, valuePath: IValuePath): any{
+	const sourceTable: any = {
 		"data": data,
 		"meta": meta
 	};
-	var sourceData = sourceTable[valuePath.source];
-	var res = utils.objPath(valuePath.path, sourceData);
-	if (valuePath.escaped){
-		res = utils.escapeHtml(res);		
-	};
+	const sourceData: string = sourceTable[valuePath.source];
+	const res = utils.objPath(valuePath.path, sourceData);
 	return res;
 };
 
@@ -126,8 +118,12 @@ export function getValue(meta: any, data: Object, valuePath: IValuePath){
  * @param {Object} resolvedPath - resolved path.
  * @returns {string} rendered string.
  */
-export function render(meta: any, data: Object, resolvedPath: IValuePath){
-	return getValue(meta, data, resolvedPath).toString();
+export function render(meta: any, data: Object, resolvedPath: IValuePath): string{
+	var text = getValue(meta, data, resolvedPath).toString(); 
+	if (resolvedPath.escaped){
+		text = utils.escapeHtml(text);		
+	};
+	return text;
 };
 
 /**

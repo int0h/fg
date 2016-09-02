@@ -24,16 +24,16 @@ export type ITplPart = string | Gap;
 export type Tpl = ITplPart[];
 
 function parseGap(node: IAstNode, html: string, parentMeta: Gap): Gap{
-	var tagMeta = gapClassMgr.parse(node, html, parentMeta);
+	const tagMeta = gapClassMgr.parse(node, html, parentMeta);
 	return tagMeta;
 };
 
 export function readTpl(ast: IAstNode, code?: string, parentMeta?: Gap): Tpl{
 
 	function iterate(children: IAstNode[]): Tpl{
-		var parts = [];
+		let parts: (string | Gap)[] = [];
 		children.forEach(function(node, id){
-			var tagMeta = parseGap(node, code, parentMeta);
+			const tagMeta = parseGap(node, code, parentMeta);
 			if (tagMeta){				
 				parts.push(tagMeta);				
 				return; 
@@ -42,7 +42,7 @@ export function readTpl(ast: IAstNode, code?: string, parentMeta?: Gap): Tpl{
 				parts.push(mj.render(node, {}));				
 				return;
 			};
-			var wrap = mj.renderWrapper(node);
+			const wrap = mj.renderWrapper(node);
 			parts.push(wrap[0]);
 			parts = parts.concat(iterate(node.children));		
 			if (wrap[1]){
@@ -54,13 +54,3 @@ export function readTpl(ast: IAstNode, code?: string, parentMeta?: Gap): Tpl{
 
 	return iterate(ast.children);
 };
-
-// function tplToJson(tpl){ //?
-// 	var parts = tpl.map(function(part){
-// 		if (typeof part == "string"){
-// 			return part;
-// 		};
-// 		return gapClassMgr.toJson(part);
-// 	});
-// 	return parts;
-// };

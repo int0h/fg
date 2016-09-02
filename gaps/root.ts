@@ -6,22 +6,16 @@ import {Gap} from '../client/gapClassMgr';
 import {FgInstance} from '../client/fgInstance';  
 import {IAstNode} from '../tplMgr';
 
-export default class GScopeItem extends Gap{
+export default class GRoot extends Gap{
 	scopePath: any;
-	type: string = "scopeItem";
+	type: string = "root";
 
 	static parse(node: IAstNode): Gap{
 		return null;
 	};
 
 	render(context: FgInstance, data: any): string{
-		const meta = this;
-		const scopeData = valueMgr.getValue(meta, data, this.resolvedPath);
-		this.scopePath = this.resolvedPath.path;
-		if (!scopeData){
-			return '';
-		};
-		return context.renderTpl(meta.content, meta, data);
+		throw new Error('root gap should not be rendered');
 	};
 
 };

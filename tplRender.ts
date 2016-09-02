@@ -18,22 +18,22 @@ interface ITplContext{
  * @param {Object} meta - meta modifier.
  * @returns {string} result code.
  */
-export default function renderTpl(tpl: Tpl, parent: Gap, data: any, metaMod){
-	var self: ITplContext = this;
-	var parts = tpl.map(function(part, partId){
+export default function renderTpl(tpl: Tpl, parent: Gap, data: any, metaMod: Function | Object){
+	const self: ITplContext = this;
+	let parts = tpl.map((part, partId)=>{
 		if (typeof part === "string"){
 			return part;
 		};
-		var partMeta = utils.simpleClone(part);
+		let partMeta = utils.simpleClone(part);
 		if (metaMod){
 			if (typeof metaMod === "function"){
-				partMeta = metaMod(partMeta, partId);
+				partMeta = (metaMod as Function)(partMeta, partId);
 			}else{
 				partMeta = utils.extend(partMeta, metaMod || {});			
 			};	
 		};		
 		return self.renderGap(self.context, parent, data, partMeta);
 	});
-	var code = parts.join('');
+	const code = parts.join('');
 	return code;
 };

@@ -14,29 +14,29 @@ export class StrTpl{
 	parts: any;
 	isString: boolean;
 
-	constructor (tpl, valueParseFn?: ValueParseFn){
+	constructor (tpl: StrTpl | string, valueParseFn?: ValueParseFn){
 		if (typeof tpl === "object"){
 			this.src = tpl.src;
 			this.gaps = tpl.gaps;
 			this.parts = tpl.parts;
 			return;
 		};
-		this.src = tpl;
+		this.src = tpl as string;
 		this.parts = [];
 		this.gaps = [];
-		return this.parse(tpl, valueParseFn);
+		return this.parse(tpl as string, valueParseFn);
 	};
 
-	parse(tpl, valueParseFn: ValueParseFn){
-		var gapStrArr = tpl.match(gapRe);
+	parse(tpl: string, valueParseFn: ValueParseFn){
+		const gapStrArr = tpl.match(gapRe);
 		if (!gapStrArr){
 			this.isString = true;
 			this.parts = [tpl];
 			return;
 		};
 		this.gaps = gapStrArr.map(function(part){
-			var partValue = part.slice(2, -1);
-			var partRes = valueParseFn(partValue);
+			const partValue: string = part.slice(2, -1);
+			const partRes: any = valueParseFn(partValue);
 			partRes.escaped = part[0] !== "!";
 			return partRes;
 		});		
@@ -45,34 +45,34 @@ export class StrTpl{
 	};
 
 	render(valueRenderFn: ValueRenderFn){
-		var gaps = this.gaps.map(valueRenderFn);
-		var parts = mixArrays(this.parts, gaps);
+		const gaps = this.gaps.map(valueRenderFn);
+		const parts = mixArrays(this.parts, gaps);
 		return parts.join('');	
 	};
 	
 };
 
-export function read(tpl, valueParseFn: ValueParseFn){
-	var res = new StrTpl(tpl, valueParseFn);
+export function read(tpl: string | StrTpl, valueParseFn: ValueParseFn): string | StrTpl{
+	let res: StrTpl = new StrTpl(tpl, valueParseFn);
 	if (res.isString){
-		res = tpl;
+		return tpl;
 	};
 	return res;
 };
 
 var gapRe = /[\$\#\!]{1}\{[^\}]*\}/gm;
 
-function mixArrays(...rest/*arrays*/){
-	var maxLength = 0;
-	var totalLength = 0;
-	for (var i = 0; i < arguments.length; i++){
-		maxLength = Math.max(arguments[i].length, maxLength);
-		totalLength += arguments[i].length;
+function mixArrays(...arrs: any[][]): any[]{
+	let maxLength = 0;
+	let totalLength = 0;
+	for (let i = 0; i < arrs.length; i++){
+		maxLength = Math.max(arrs[i].length, maxLength);
+		totalLength += arrs[i].length;
 	};
-	var resArr = [];
-	var arrayCount = arguments.length;
-	for (var id = 0; id < maxLength; id++){				
-		for (var j = 0; j < arrayCount; j++){
+	let resArr: any[] = [];
+	const arrayCount = arguments.length;
+	for (let id = 0; id < maxLength; id++){				
+		for (let j = 0; j < arrayCount; j++){
 			if (arguments[j].length > id){
 				resArr.push(arguments[j][id]);
 			};

@@ -11,7 +11,7 @@ export type Anchor = HTMLElement;
  * @returns {string} Id of the anchor tag.
  */
 function genId(context: FgInstance, gap: Gap): string{
-   	var id = ['fg', context.id, 'aid', gap.gid].join('-');
+   	const id = ['fg', context.id, 'aid', gap.gid].join('-');
     return id;
 };
 
@@ -22,7 +22,7 @@ function genId(context: FgInstance, gap: Gap): string{
  * @returns {string} Html code of the anchor. 
  */
 export function genCode(context: FgInstance, gap: Gap): string{
-    var code = '<script type="fg-js/anchor" id="' 
+    const code = '<script type="fg-js/anchor" id="' 
         + genId(context, gap) 
         + '"></script>';
     return code;
@@ -35,7 +35,7 @@ export function genCode(context: FgInstance, gap: Gap): string{
  * @returns {Object} Dom element of the anchor.
  */
 export function find(context: FgInstance, gap: Gap): Anchor{
-   	var id = genId(context, gap);    
+   	const id = genId(context, gap);    
     return document.getElementById(id);
 };
 
@@ -45,11 +45,12 @@ export function find(context: FgInstance, gap: Gap): Anchor{
  * @param {string} position - Defines where code be placed. "after" and "before" are used relative to anchor node.
  * @param {string} html - HTML code to be placed.
  */
-export function insertHTML(anchor: Anchor, position: string, html: string){
-   	var posTable = {
-           "before": "beforebegin",
-           "after": "afterend"
+
+export function insertHTML(anchor: Anchor, position: string, html: string){   	
+    let pos: string;
+    switch (position){
+        case "before": pos = "beforebegin"; break;
+        case "after": pos = "afterend"; break;
     };
-    var pos = posTable[position];
     anchor.insertAdjacentHTML(pos, html);
 };

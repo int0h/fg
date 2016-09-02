@@ -8,13 +8,15 @@ import {IAstNode} from '../tplMgr';
 
 export default class GContent extends Gap{
 
+	type: string = "content";
+
 	static parse(node: IAstNode){
 		if (node.tagName !== "content"){
 			return null;
 		};
-		var meta: GContent;
-		meta.type = "content";		
+		let meta: GContent = {} as GContent;
 		meta.isVirtual = true;
+		meta.type = "content";
 		/*meta.fgName = node.nodeName.slice(3);
 		meta.path = node.attrs.class 
 			? node.attrs.class.split(' ')

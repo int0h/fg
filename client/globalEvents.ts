@@ -1,18 +1,27 @@
-var events = {};
+import {FgInstance} from './fgInstance';
 
-export function handler(name, event){
-	var elm = event.target;
+interface IEventTable{
+	[key: string]: boolean;
+};
+
+var events: IEventTable = {};
+
+const win: any = window;
+
+export function handler(name: string, event: any){
+	const helper: any = win['$fg'];
+	let elm: HTMLElement = event.target;
 	while (elm){
-		var fg = window['$fg'].byDom(elm);
+		let fg: FgInstance = helper.byDom(elm);
 		if (fg){
 			fg.emitApply(name, fg, [event]);
 			//return;
 		};
-		elm = elm.parentNode;
+		elm = elm.parentElement;
 	};
 };
 
-export function listen(name){
+export function listen(name: string){
 	if (name in events){
 		return;
 	};	

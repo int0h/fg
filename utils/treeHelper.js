@@ -108,7 +108,7 @@ TreeNode.prototype.access = function(path){
     }; 
 };
 
-export default function TreeHelper(opts, rootData?){
+export default function TreeHelper(opts, rootData){
     opts = opts || {};
     opts.kind = opts.kind || 'array';
     var initTreeNode = opts.initTreeNode || function(){

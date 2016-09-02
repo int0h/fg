@@ -5,7 +5,7 @@ import {FgInstance} from './fgInstance';
 import {Gap} from './gapClassMgr';
 import TreeHelper from '../utils/TreeHelper';
 
-function initNodeFn(){
+function initNodeFn(): any{
 	return {
 		gaps: []
 	};
@@ -15,24 +15,24 @@ export default class GapStorage{
 	context: FgInstance;
 	gaps: Gap[];
 	scopeTree: any;
-	eidDict: Object;
+	eidDict: any;
 
 	constructor(context: FgInstance){
 		this.context = context;
 		this.gaps = [];
-		this.scopeTree = TreeHelper({
+		this.scopeTree = (TreeHelper as Function)({
 			kind: 'dict',
-			initNode: initNodeFn
+			initTreeNode: initNodeFn
 		});
 		this.eidDict = {};	
 	};
 
-	setScopeTrigger(gap: Gap, scopePath){
+	setScopeTrigger(gap: Gap, scopePath: string[]){
 		var scope = this.scopeTree.access(scopePath);	
 		scope.data.gaps.push(gap);
 	};
 
-	setTriggers(gap: Gap, scopeTriggers){	
+	setTriggers(gap: Gap, scopeTriggers: string[][]){	
 		scopeTriggers.forEach(this.setScopeTrigger.bind(this, gap));
 	};
 
@@ -61,11 +61,11 @@ export default class GapStorage{
 		return;
 	};
 
-	byScope(scopePath, targetOnly?: boolean){
+	byScope(scopePath: string[], targetOnly?: boolean){
 		var scope = this.scopeTree.access(scopePath);		
-		var subNodes = [];
+		var subNodes: any[] = [];
 		if (scope.childCount !== 0 && !targetOnly){
-			subNodes = scope.getDeepChildArr().map(function(node){
+			subNodes = scope.getDeepChildArr().map(function(node: any){
 				return {
 					gaps: node.data.gaps,
 					path: node.path	
@@ -79,7 +79,7 @@ export default class GapStorage{
 			parents: parents
 		};
 	};
-	removeScope(scopePath){
+	removeScope(scopePath: string[]){
 		var scope = this.byScope(scopePath);	
 		var removedDomGaps = scope.target;
 		var removedGaps = scope.target;
@@ -90,11 +90,11 @@ export default class GapStorage{
 		this.gaps = this.gaps.filter(function(gap){
 			return removedGaps.indexOf(gap) < 0;
 		});
-		removedDomGaps.forEach(function(gap){
+		removedDomGaps.forEach(function(gap: Gap){
 			gap.removeDom();
 		});
 	};
-	byEid(eid){
+	byEid(eid: string){
 		return this.eidDict[eid];
 	};
 	getGid(){
