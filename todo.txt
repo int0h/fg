@@ -9,3 +9,5 @@
 - why GapClass != FgClass?
 - for if etc sugar
 - fg class reconsidering (remove fgProto)
+- fix deploying
+    - fix test building
