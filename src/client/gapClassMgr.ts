@@ -1,7 +1,7 @@
 "use strict";
 
 import {FgInstance} from './fgInstance';
-import {IValuePath} from '../valueMgr';
+import {IDataQuery} from '../valueMgr';
 import {Tpl} from '../tplMgr';
 import * as utils from '../utils';
 import * as valueMgr from '../valueMgr';
@@ -13,11 +13,11 @@ export abstract class Gap{
 	parent: Gap;
 	root: Gap;
 	context: FgInstance;
-	path: IValuePath;  
-	resolvedPath: IValuePath;
+	path: IDataQuery;  
+	resolvedPath: IDataQuery;
 	eid: string;
 	gid: number;
-	scopePath: IValuePath;
+	scopePath: IDataQuery;
 	isVirtual: boolean;
 	fg: FgInstance;
 	storageId: number;

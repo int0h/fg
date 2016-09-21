@@ -3,7 +3,7 @@
 import * as utils from '../utils';
 import {FgInstance} from './fgInstance';
 import {Gap} from './gapClassMgr';
-import TreeHelper from '../utils/TreeHelper';
+import TreeHelper from '../utils/treeHelper';
 
 function initNodeFn(): any{
 	return {

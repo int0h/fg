@@ -7,7 +7,7 @@ import {FgInstance} from '../client/fgInstance';
 import {IAstNode} from '../tplMgr';
 
 export default class GScopeItem extends Gap{
-	scopePath: any;
+	scope: valueMgr.IScope;
 	type: string = "scopeItem";
 
 	static parse(node: IAstNode): Gap{
@@ -17,7 +17,10 @@ export default class GScopeItem extends Gap{
 	render(context: FgInstance, data: any): string{
 		const meta = this;
 		const scopeData = valueMgr.getValue(meta, data, this.resolvedPath);
-		this.scopePath = this.resolvedPath.path;
+		this.scope = {
+			path: this.resolvedPath.path,
+			name: meta.eid || ''
+		};
 		if (!scopeData){
 			return '';
 		};

@@ -35,7 +35,7 @@ function renderScopeContent(context: FgInstance, scopeMeta: Gap, scopeData: any,
 
 export default class GScope extends Gap{
 	items: Gap[];
-	scopePath: any;
+	scope: valueMgr.IScope;
 	type: string = "scope";
 
 	static parse(node: IAstNode, html: string): Gap{
@@ -55,7 +55,10 @@ export default class GScope extends Gap{
 		const meta = this;
 		meta.items = [];
 		const scopeData = valueMgr.getValue(meta, data, this.resolvedPath);
-		this.scopePath = this.resolvedPath.path;
+		this.scope = {
+			path: this.resolvedPath.path,
+			name: meta.eid || ''
+		};
 		const anchorCode = anchorMgr.genCode(context, meta);		
 		const parts = renderScopeContent(context, meta, scopeData, data, 0);	
 		return parts.join('\n') + anchorCode;

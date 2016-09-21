@@ -18,3 +18,9 @@ scope.nested
     scope.values
         .subScopeItem
             data
+//- named scopes
+scope#named.named
+    scope#subNamed.subNamed
+        | #{$named.val}, #{$subNamed.val}
+for item in forScope
+    | Out #{$item.val}    

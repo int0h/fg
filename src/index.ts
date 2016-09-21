@@ -12,7 +12,7 @@ import * as ts from 'typescript';
 import {FgMgr, IFgDeclaration} from './fgMgr';
 import * as serverUtils from './serverUtils';
 
-const fgLibPath = path.dirname(require.resolve('fg-js')) + '/';
+const fgLibPath = path.resolve(path.dirname(require.resolve('fg-js')) + '/', '..');
 
 function getSubDirs(srcpath: string): string[]{
 	return fs.readdirSync(srcpath).filter(function(file) {
@@ -58,13 +58,13 @@ export function loadDir(fgMgr: FgMgr, path: string){
 };
 
 export function buildTest(cb: Function){
-	const testDir = fgLibPath + '/tests/';
-	buildRuntime(testDir + '/build/runtime.js', function(err: Error){
+	const testDir = fgLibPath + '/src/tests/';
+	buildRuntime(fgLibPath + '/build/tests/runtime.js', function(err: Error){
 		if (err){
 			cb(err);
 			return;
 		};
-		build(testDir + '/fg-src/', testDir + '/build/fg.js', function(err: Error){
+		build(testDir + '/fg-src/', fgLibPath + '/build/tests/build/fg.js', function(err: Error){
 			cb(err);
 		});
 	});
@@ -76,7 +76,7 @@ export function buildRuntime(destPath: string, cb: Function){
 		debug: true
 	});
 	brofy
-		.add(fgLibPath + '/../src/client/main.ts')
+		.add(fgLibPath + '/src/client/main.ts')
 		.plugin(tsify)
 		.bundle(function(err: any, code: Buffer){
 			if (err){
@@ -118,10 +118,11 @@ export function build(srcPath: string, destPath: string, cb: Function){
 			const classCode = 'module.exports = ' + fg.classFn.toString();
 			fs.writeFileSync(fgPath + '/class.js', classCode);
 		};
-		const tplCode = 'module.exports = ' + serverUtils.toJs(fg.tpl);	
+		const tplSource = '/*\n' + fg.tplSource + '\n*/\n\n';
+		const tplCode = tplSource + 'module.exports = ' + serverUtils.toJs(fg.tpl);	
 		fs.writeFileSync(fgPath + '/tpl.js', tplCode);
 		includeCodeParts.push(includeFgCode
-			.replace('%name%', fg.name)
+			.replace('%name%', fg.name) 
 			.replace('%tpl%', 'require("./' + fg.name + '/tpl.js")')
 			.replace('%classFn%', fg.classFn 
 				? 'require("./' + fg.name + '/class.js")'

@@ -7,6 +7,7 @@ export interface IFgObject{
 	name: string;
 	tpl: tplMgr.Tpl;
 	classFn: Function;
+	tplSource: string;
 };
 
 export interface IFgDeclaration{
@@ -48,7 +49,8 @@ export class FgMgr{
 		this.fgs[name] = {
 			"tpl": tpl,
 			"name": name,
-			"classFn": classFn
+			"classFn": classFn,
+			"tplSource": sources.tpl 
 		};
 	};
 

@@ -2,7 +2,7 @@
 
 import * as utils from '../utils';  
 import * as valueMgr from '../valueMgr';  
-import {StrTpl, read as readTpl} from '../StrTpl';  
+import {StrTpl, read as readTpl} from '../strTpl';  
 import {Gap, render} from '../client/gapClassMgr';  
 import {FgInstance} from '../client/fgInstance';  
 import {IAstNode} from '../tplMgr';

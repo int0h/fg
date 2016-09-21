@@ -7,7 +7,7 @@ import {Tpl} from '../tplMgr';
 import {Gap} from './gapClassMgr';
 import {FgClass} from './fgClass';
 import * as utils from '../utils';
-import GapStorage from './GapStorage';
+import GapStorage from './gapStorage';
 import * as globalEvents from './globalEvents';
 import GRoot from '../gaps/root';
 const helper = require('./helper');

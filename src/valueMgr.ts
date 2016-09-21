@@ -4,10 +4,22 @@ import * as utils from './utils';
 
 export type IValuePathItem = string;
 
-export interface IValuePath {
-    path: Array<IValuePathItem>;
+export type IPath = IValuePathItem[];
+
+export interface IDataQuery {
+    path: IPath;
 	source: string;
 	escaped: boolean;
+	scopeName: string;
+};
+
+export interface IScope{
+	path: IPath;
+	name: string;	
+};
+
+interface IScopeSet{
+	[key: string]: IPath;
 };
 
 /**
@@ -16,20 +28,23 @@ export interface IValuePath {
  * @param {Object} extraInfo - data object to be added to result.
  * @returns {Object} path object.
  */
-export function read(parts: Array<string>, extraInfo?: Object): IValuePath{
+export function read(parts: Array<string>, extraInfo?: Object): IDataQuery{
 	let source = "data";
-	let path = parts.map(function(part){		
-		// if (part[0] === '$'){
-		// 	return {
-		// 		op: part.slice(1)
-		// 	};
-		// };
-		return part; 
-	});
-	const res: IValuePath = {
+	const first = parts[0];
+	let path = parts;
+	let scopeName: string = null;
+	if (/^[\$]/.test(first)){
+		path = path.slice(1);
+		if (first[0] === "$"){
+			source = "scope";
+			scopeName = first.slice(1); 			
+		};
+	};
+	const res: IDataQuery = {
 		"source": source,
 		"path": path,
-		"escaped": true
+		"escaped": true,
+		"scopeName": scopeName
 	};
 	if (extraInfo){
 		utils.extend(res, extraInfo);
@@ -43,7 +58,7 @@ export function read(parts: Array<string>, extraInfo?: Object): IValuePath{
  * @param {Object} extraInfo - data object to be added to result.
  * @returns {Object} path object.
  */
-export function parse(str: string, extraInfo?: Object): IValuePath{
+export function parse(str: string, extraInfo?: Object): IDataQuery{
 	const parts = str.trim().split('.');
 	return read(parts, extraInfo);
 };
@@ -53,14 +68,20 @@ export function parse(str: string, extraInfo?: Object): IValuePath{
  * @param {Object} meta - gap meta connected to the path.
  * @returns {Object} scope path object.
  */
-function findScopePath(meta: any){
+function findScopes(meta: any): IScopeSet{
 	let parent = meta.parent;
+	let scopeObj: IScopeSet = {
+		"root": []
+	};
 	while (true){		
 		if (!parent){
-			return [];
+			return scopeObj;
 		};
-		if (parent.scopePath){
-			return parent.scopePath;
+		if (parent.scope){
+			const scopeName = parent.scope.name;			
+			if (!(scopeName in scopeObj)){
+				scopeObj[scopeName] = parent.scope.path;
+			};
 		};
 		parent = parent.parent;
 	};
@@ -72,22 +93,30 @@ function findScopePath(meta: any){
  * @param {Object} path - value path object.
  * @returns {Object} resolved path object.
  */
-export function resolvePath(meta: any, path: IValuePath): IValuePath{
-	const scopePath = findScopePath(meta);
-	let res: IValuePath = {
+export function resolvePath(meta: any, dataQuery: IDataQuery): IDataQuery{
+	const scopeSet = findScopes(meta);
+	let res: IDataQuery = {
 		path: null,
-		source: "data",
-		escaped: path.escaped
+		source: dataQuery.source,
+		escaped: dataQuery.escaped,
+		scopeName: dataQuery.scopeName
 	};
-	res.path = scopePath.slice();
-	path.path.forEach(function(key){
-		if (typeof key[0] !== "$"){
+	let curScopePath: IPath; 
+	if (dataQuery.source === "scope"){
+		curScopePath = scopeSet[dataQuery.scopeName];
+	}else{
+		const defaultScope = scopeSet[''];
+		curScopePath = defaultScope
+			? defaultScope
+			: []; 
+	};
+	res.path = curScopePath.slice();		
+	dataQuery.path.forEach(function(key){
+		if (typeof key[0] !== "^"){
 			res.path.push(key);			
 			return;
 		};
-		if (key === "$root"){
-			res.path = [];
-		} else if (key === "$up"){
+		if (key === "^"){
 			res.path.pop();
 		};
 	});
@@ -101,7 +130,7 @@ export function resolvePath(meta: any, path: IValuePath): IValuePath{
  * @param {Object} valuePath - value path to be fetched.
  * @returns {any} fetched data.
  */
-export function getValue(meta: any, data: Object, valuePath: IValuePath): any{
+export function getValue(meta: any, data: Object, valuePath: IDataQuery): any{
 	const sourceTable: any = {
 		"data": data,
 		"meta": meta
@@ -118,7 +147,7 @@ export function getValue(meta: any, data: Object, valuePath: IValuePath): any{
  * @param {Object} resolvedPath - resolved path.
  * @returns {string} rendered string.
  */
-export function render(meta: any, data: Object, resolvedPath: IValuePath): string{
+export function render(meta: any, data: Object, resolvedPath: IDataQuery): string{
 	var text = getValue(meta, data, resolvedPath).toString(); 
 	if (resolvedPath.escaped){
 		text = utils.escapeHtml(text);		
@@ -133,7 +162,7 @@ export function render(meta: any, data: Object, resolvedPath: IValuePath): strin
  * @param {Object} path - unresolved path.
  * @returns {string} rendered string.
  */
-export function resolveAndRender(meta: any, data: Object, path: IValuePath){
+export function resolveAndRender(meta: any, data: Object, path: IDataQuery){
 	var resolvedPath = resolvePath(meta, path);
 	return render(meta, data, resolvedPath);
 };
