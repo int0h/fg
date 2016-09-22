@@ -7,6 +7,11 @@ import * as utils from '../utils';
 import * as valueMgr from '../valueMgr';
 import {IAstNode} from '../tplMgr';
 
+export interface IGapData{
+	type: string;
+	isVirtual: boolean;
+};
+
 export abstract class Gap{
 	type: string;
 	children: Gap[];

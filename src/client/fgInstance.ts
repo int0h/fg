@@ -21,8 +21,8 @@ export class FgInstanceBase{
 	code: string;	
 	dom: HTMLElement[];
 	data: any;
-	meta: Gap;
-	gapMeta: Gap;
+	rootGap: Gap;
+	selfGap: Gap;
 	parent: FgInstance;
 	eventEmitter: EventEmitter;
 	gapStorage: GapStorage;
@@ -74,12 +74,12 @@ export class FgInstanceBase{
 
 	getHtml(data: any, meta?: Gap): string{
 		this.data = data;
-		this.gapMeta = meta;
+		this.selfGap = meta;
 		let rootGap = new GRoot(this, meta);
 		rootGap.type = "root";
 		rootGap.isVirtual = true;
 		rootGap.fg = this;
-		this.meta = rootGap as Gap;
+		this.rootGap = rootGap as Gap;
 		const cookedData = this.fgClass.cookData(data);
 		return this.renderTpl(this.fgClass.tpl, rootGap as Gap, cookedData, metaMap.bind(null, this));
 	};
@@ -172,7 +172,7 @@ export class FgInstanceBase{
 	};
 
 	getDom(){
-		return this.meta.getDom();
+		return this.rootGap.getDom();
 	};
 
 	jq(){

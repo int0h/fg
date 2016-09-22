@@ -27,8 +27,8 @@ export default class GContent extends Gap{
 	};
 
 	render(context: FgInstance, data: any){
-		this.scopePath = context.gapMeta.scopePath;
-		return context.parent.renderTpl(context.meta.content, context.gapMeta.parent, context.parent.data);
+		this.scopePath = context.selfGap.scopePath;
+		return context.parent.renderTpl(context.rootGap.content, context.selfGap.parent, context.parent.data);
 	};
 
 };
