@@ -2,21 +2,25 @@
 
 import * as utils from '../utils';  
 import * as valueMgr from '../valueMgr';  
-import {Gap} from '../client/gapClassMgr';  
+import {Gap, IGapData} from '../client/gapClassMgr';  
 import {FgInstance} from '../client/fgInstance';  
 import {IAstNode} from '../tplMgr';
 
+interface IContentParsedData extends IGapData {
+};
+
 export default class GContent extends Gap{
 
-	type: string = "content";
+	type: string = "content";	
+	public static isVirtual = true; 
 
-	static parse(node: IAstNode){
+	static parse(node: IAstNode): IGapData{
 		if (node.tagName !== "content"){
 			return null;
 		};
-		let meta: GContent = {} as GContent;
-		meta.isVirtual = true;
-		meta.type = "content";
+		let meta: IContentParsedData = {
+			type: "content"
+		};
 		/*meta.fgName = node.nodeName.slice(3);
 		meta.path = node.attrs.class 
 			? node.attrs.class.split(' ')
@@ -27,7 +31,6 @@ export default class GContent extends Gap{
 	};
 
 	render(context: FgInstance, data: any){
-		this.scopePath = context.selfGap.scopePath;
 		return context.parent.renderTpl(context.rootGap.content, context.selfGap.parent, context.parent.data);
 	};
 

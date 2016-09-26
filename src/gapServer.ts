@@ -3,7 +3,7 @@
 import * as utils from './utils';
 import * as path from 'path';
 import {IAstNode} from './tplMgr';
-import {Gap} from './client/gapClassMgr';
+import {Gap, IGapData} from './client/gapClassMgr';
 import {FgInstance} from './client/fgInstance';
 import {default as gaps} from './gaps';
 
@@ -19,39 +19,27 @@ export interface IGapMatch{
 	meta: any;
 };
 
-export function parse(ast: IAstNode, html: string, parentMeta: Gap){
-	/*var name = ast.nodeName;
-	var gap = gapTable[name];
-	if (!gap){
-		return false;
-	};*/
-	let matched: IGapMatch[] = [];
-	for (let i in gaps){
-		const gap: typeof Gap = gaps[i];
-		const meta = gap.parse(ast, html, parentMeta);
+interface IGapItem{
+	name: string;
+	gap: typeof Gap;
+}
+
+export function parse(ast: IAstNode, parents: IGapData[], html: string): IGapData{
+	let gapList: IGapItem[] = [];
+	for (let name in gaps){
+		gapList.push({
+			name,
+			gap: gaps[name]
+		});
+	};
+	gapList.sort((a: IGapItem, b: IGapItem) => {
+		return b.gap.priority - a.gap.priority;
+	});
+	for (let gapItem of gapList){
+		const meta = gapItem.gap.parse(ast, parents, html);
 		if (meta){
-			matched.push({
-				"gap": gap,
-				"meta": meta
-			});
+			return meta;
 		};
-	};
-	if (matched.length > 1){
-		const maxPrior = Math.max.apply(Math, matched.map(function(item){
-			return item.gap.priority || 0;
-		}));		
-		matched = matched.filter(function(item){
-			return (item.gap.priority || 0) === maxPrior;
-		});	
-	}
-	if (matched.length === 1){
-		return matched[0].meta;
-	};
-	if (matched.length === 0){
-		return null;
-	};	
-	if (matched.length > 1){
-		throw new Error("Gap parsing conflict");
 	};
 	return null;
 };

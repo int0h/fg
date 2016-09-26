@@ -8,59 +8,42 @@ export interface ValueRenderFn{
 	(parsed: any): string;
 };
 
-export class StrTpl{
-	src: string;
-	gaps: any;
-	parts: any;
-	isString: boolean;
+export type ValueParsedType = any;
 
-	constructor (tpl: StrTpl | string, valueParseFn?: ValueParseFn){
-		if (typeof tpl === "object"){
-			this.src = tpl.src;
-			this.gaps = tpl.gaps;
-			this.parts = tpl.parts;
-			return;
-		};
-		this.src = tpl as string;
-		this.parts = [];
-		this.gaps = [];
-		return this.parse(tpl as string, valueParseFn);
-	};
+export type StrTplValue = string | ValueParsedType;
 
-	parse(tpl: string, valueParseFn: ValueParseFn){
-		const gapStrArr = tpl.match(gapRe);
-		if (!gapStrArr){
-			this.isString = true;
-			this.parts = [tpl];
-			return;
-		};
-		this.gaps = gapStrArr.map(function(part){
-			const partValue: string = part.slice(2, -1);
-			const partRes: any = valueParseFn(partValue);
-			partRes.escaped = part[0] !== "!";
-			return partRes;
-		});		
-		this.parts = tpl.split(gapRe);
-		return this;
-	};
-
-	render(valueRenderFn: ValueRenderFn){
-		const gaps = this.gaps.map(valueRenderFn);
-		const parts = mixArrays(this.parts, gaps);
-		return parts.join('');	
-	};
-	
-};
-
-export function read(tpl: string | StrTpl, valueParseFn: ValueParseFn): string | StrTpl{
-	let res: StrTpl = new StrTpl(tpl, valueParseFn);
-	if (res.isString){
-		return tpl;
-	};
-	return res;
-};
+export type StrTplData = StrTplValue[];
 
 var gapRe = /[\$\#\!]{1}\{[^\}]*\}/gm;
+
+export function parse(tpl: string, valueParseFn: ValueParseFn): StrTplData | string{
+	const gapStrArr = tpl.match(gapRe);
+	if (!gapStrArr){
+		return tpl;
+	};	
+	const gaps = gapStrArr.map(function(part){
+		const partValue: string = part.slice(2, -1);
+		const partRes: any = valueParseFn(partValue);
+		partRes.escaped = part[0] !== "!";
+		return partRes;
+	});		
+	const strings = tpl.split(gapRe);
+	return mixArrays(strings, gaps);
+};
+
+export function render(tplData: StrTplData | string, valueRenderFn: ValueRenderFn): string{
+	if (typeof tplData === "string"){
+		return tplData;
+	};
+	const parts = tplData as StrTplData;
+	const renderedParts = parts.map(part => {
+		if (typeof part === "string"){
+			return part;
+		};
+		return valueRenderFn(part);
+	})
+	return renderedParts.join('');	
+};
 
 function mixArrays(...arrs: any[][]): any[]{
 	let maxLength = 0;

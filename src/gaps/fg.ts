@@ -2,26 +2,42 @@
 
 import * as utils from '../utils';  
 import * as valueMgr from '../valueMgr';  
-import {Gap} from '../client/gapClassMgr';  
+import {Gap, IGapData} from '../client/gapClassMgr';  
 import {FgInstance} from '../client/fgInstance';  
-import {IAstNode, readTpl} from '../tplMgr';
+import {IAstNode, readTpl, Tpl} from '../tplMgr';
+import {IDataPath, IDataQuery} from '../valueMgr';
+
+interface IFgParsedData extends IGapData {
+	dataSource: IDataQuery;
+	fgName: string;
+	content: Tpl
+};
 
 export default class GFg extends Gap{
 	parentFg: FgInstance;
 	fgName: string;
 	type: string = "fg";
+	dataSource: IDataQuery;
+	fg: FgInstance;
 
-	static parse(node: IAstNode){
+	constructor (context: FgInstance, parsedMeta: IGapData, parent: Gap){
+		super(context, parsedMeta, parent);
+		this.paths = [this.dataSource.path];
+	};
+
+	static parse(node: IAstNode, parents: IGapData[]): IGapData{
 		if (node.type != 'tag' || !~node.tagName.indexOf("fg-")){
 			return null;
 		};
-		var meta:GFg = {} as GFg;
-		meta.type = "fg";
-		meta.isVirtual = true;
-		meta.fgName = node.tagName.slice(3);
-		meta.path = utils.parsePath(node);		
-		meta.eid = node.attrs.id || null;
-		meta.content = readTpl(node, null, meta);
+		const parsedPath = utils.parsePath(node);
+		const resolvedQuery = valueMgr.resolvePath(parsedPath, parents);
+		var meta: IFgParsedData = {
+			type: "fg",
+			fgName: node.tagName.slice(3),
+			dataSource: resolvedQuery,
+			eid: node.attrs.id || null,
+			content: readTpl(node, null, parents)
+		};
 		return meta;
 	};
 
@@ -31,7 +47,7 @@ export default class GFg extends Gap{
 		//this.renderedContent = context.renderTpl(this.content, meta, data);
 		const win: any = window;
 		var fgClass = win['$fg'].classes[this.fgName];
-		var fgData = utils.deepClone(valueMgr.getValue(this, data, this.resolvedPath));	
+		var fgData: any = utils.deepClone(valueMgr.getValue(this, data, this.dataSource));	
 		var fg = fgClass.render(fgData, this, context);
 		fg.on('update', function(path: any, val: any){
 			//context.update(scopePath.concat(path), val);

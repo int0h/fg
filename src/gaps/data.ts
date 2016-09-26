@@ -2,37 +2,51 @@
 
 import * as utils from '../utils';  
 import * as valueMgr from '../valueMgr';  
-import {Gap} from '../client/gapClassMgr';  
+import {Gap, IGapData} from '../client/gapClassMgr';  
 import {FgInstance} from '../client/fgInstance';  
 import {IAstNode} from '../tplMgr';
+import {IDataPath, IDataQuery} from '../valueMgr';
+
+interface IDataParsedData extends IGapData {
+	value: IDataQuery;
+};
 
 export default class GData extends Gap{
 
 	type: string = "data";
+	value: IDataQuery;
+	public static isVirtual = false; 
 
-	static parse(node: IAstNode){
+	constructor (context: FgInstance, parsedMeta: IGapData, parent: Gap){
+		super(context, parsedMeta, parent);
+		this.paths = [this.value.path];
+	};
+
+	static parse(node: IAstNode, parents: IGapData[]): IGapData{
 		if (node.tagName != "data"){
 			return null;
 		};
-		var meta: GData = {} as GData;
-		meta.type = "data";
-		meta.isVirtual = false;
-		meta.path = utils.parsePath(node);		
-		meta.eid = node.attrs.id || null;
+		const parsedPath = utils.parsePath(node);
+		const resolvedQuery = valueMgr.resolvePath(parsedPath, parents);
+		const meta: IDataParsedData = {
+			type: "data",
+			value: resolvedQuery,
+			eid: node.attrs.id || null
+		};
 		return meta;
 	};
 
-	render(context: FgInstance, data: any){
-		var value = valueMgr.render(this, data, this.resolvedPath);
+	render(context: FgInstance, data: any): string{
+		const value = valueMgr.render(this, data, this.value);
 		return utils.renderTag({
 			name: "span",
-			attrs: this.attrs,
+			attrs: {},
 			innerHTML: value
 		});
 	};
 
 	update(context: FgInstance, meta: Gap, scopePath: any, value: any){
-		var node = meta.getDom()[0];
+		const node = meta.getDom()[0];
 		if (!node){
 			
 		};

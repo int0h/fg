@@ -1,7 +1,7 @@
 "use strict";
 
 import {FgInstance} from './fgInstance';
-import {IDataQuery} from '../valueMgr';
+import {IDataPath} from '../valueMgr';
 import {Tpl} from '../tplMgr';
 import * as utils from '../utils';
 import * as valueMgr from '../valueMgr';
@@ -9,50 +9,55 @@ import {IAstNode} from '../tplMgr';
 
 export interface IGapData{
 	type: string;
-	isVirtual: boolean;
+	isVirtual?: boolean;
+	eid?: string;
+	scope?: {
+		name: string,
+		path: IDataPath
+	},
+	scopeId?: number
+};
+
+export interface IScopeTable {
+	[key: string]: IDataPath;
 };
 
 export abstract class Gap{
 	type: string;
-	children: Gap[];
+	children: Gap[] = [];
 	parent: Gap;
 	root: Gap;
 	context: FgInstance;
-	path: IDataQuery;  
-	resolvedPath: IDataQuery;
+	paths: IDataPath[] = [];	
+	deps: IDataPath[] = [];
 	eid: string;
 	gid: number;
-	scopePath: IDataQuery;
 	isVirtual: boolean;
-	fg: FgInstance;
-	storageId: number;
-	attrs: any;
-	content: Tpl;
-	currentScopeHolder: Gap;
+	scopeTable: IScopeTable;
 
-	constructor (context: FgInstance, parsedMeta?: any, parent?: Gap){	
+	public static priority: number = 0;
+
+
+	constructor (context: FgInstance, parsedMeta: IGapData, parent: Gap){	
 		utils.extend(this, parsedMeta); // todo: why?
 		this.children = [];	
-		this.parent = parent || null;
-		this.root = this;
-		this.context = context;	
-		//this.scopePath = utils.getScopePath(this);
-		//this.triggers = [];
-		context.gapStorage.reg(this);
-		if (this.path){
-			this.resolvedPath = valueMgr.resolvePath(this, this.path); 
-			if (this.resolvedPath.source === "data"){
-				context.gapStorage.setTriggers(this, [this.resolvedPath.path]);
-			};	
+		this.context = context;			
+		if (parent){
+			this.parent = parent;					
+			this.root = parent.root;
+			parent.children.push(this);
+		}else{
+			this.parent = null;					
+			this.root = this;
 		};
-		if (!parent){
-			return this;
-		};
-		this.root = parent.root;
-		parent.children.push(this);
+		
 	};
 
-	static parse(node: IAstNode, html?: string, parentMeta?: Gap): Gap{
+	static afterParse(gapData: IGapData, parents: IGapData[]){
+
+	};
+
+	static parse(node: IAstNode, parents: IGapData[], html?: string): IGapData{
 		return null;
 	};
 
@@ -75,10 +80,11 @@ export abstract class Gap{
 	};
 
 	data(val?: any){
-		if (arguments.length === 0){
-			return utils.objPath(this.scopePath.path, this.context.data);
-		};
-		this.context.update(this.scopePath.path, val);	
+		// TODO: !
+		// if (arguments.length === 0){
+		// 	return utils.objPath(this.scopePath.path, this.context.data);
+		// };
+		// this.context.update(this.scopePath.path, val);	
 	};
 
 	findRealDown(): Gap[]{

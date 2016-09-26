@@ -1,11 +1,13 @@
 "use strict";
 
 import * as utils from '../utils';  
+import {IAttrs} from '../utils/tplUtils';  
 import * as valueMgr from '../valueMgr';  
-import {StrTpl, read as readStrTpl} from '../strTpl';  
-import {Gap} from '../client/gapClassMgr';  
+import * as strTpl from '../strTpl';  
+import {Gap, IGapData} from '../client/gapClassMgr';  
 import {FgInstance} from '../client/fgInstance';  
-import {IAstNode, readTpl} from '../tplMgr';
+import {IAstNode, readTpl, Tpl} from '../tplMgr';
+import {IDataPath, IDataQuery} from '../valueMgr';
 
 function isScope(item: Gap){
 	if (typeof item === "string"){
@@ -14,24 +16,47 @@ function isScope(item: Gap){
 	return item.type === "scope";
 };
 
-export default class GRaw extends Gap{
-	isRootNode: boolean;
-	isScopeItem: boolean;
-	isScopeHolder: boolean;
+interface IRawParsedData extends IGapData {
+	value: IDataQuery;
 	tagName: string;
-	type: string = "raw";
-	static priority: number = -1;
+	attrs: RawAttrs;
+	content: Tpl;
+};
 
-	static parse(node: IAstNode, html?: string, parentMeta?: Gap){
+export interface IRawAttr {
+	name: strTpl.StrTplValue;
+	value: strTpl.StrTplValue;
+}
+
+export type RawAttrs = IRawAttr[];
+
+export default class GRaw extends Gap{
+	type: string = "raw";
+	value: IDataQuery;
+	tagName: string;
+	attrs: RawAttrs;
+	content: Tpl;
+	
+	public static priority: number = -1;
+	public static isVirtual = false; 
+
+	static parse(node: IAstNode, parents: IGapData[], html?: string): IGapData{
 		if (node.type !== "tag"){
 			return null;
 		};
+		let isRootNode = false;
+		let isScopeItem = false;
+		let isScopeHolder = false;
 		let hasDynamicAttrs = false;
-		const meta: GRaw = {} as GRaw;
-		meta.type = "raw";
-		meta.isVirtual = false;
-		meta.isRootNode = node.parent.type !== "tag";
-		meta.tagName = node.tagName;
+		const meta: IRawParsedData = {
+			type: "raw",
+			tagName: node.tagName,
+			attrs: [],
+			value: null,
+			eid: null,
+			content: []
+		};
+		isRootNode = node.parent.type !== "tag";
 		if ("id" in node.attrs){
 			meta.eid = node.attrs.id.value;
 			delete node.attrs.id;
@@ -41,58 +66,55 @@ export default class GRaw extends Gap{
 			const attrVal = attr.value.type === "string"
 				? attr.value.value
 				: (attr.value.escaped ? '#' : '!') + '{' + attr.value.key + '}';		
-			const value = readStrTpl(attrVal, valueMgr.parse);
-			const name = readStrTpl(attr.name, valueMgr.parse);
+			const value = strTpl.parse(attrVal, valueMgr.parse);
+			const name = strTpl.parse(attr.name, valueMgr.parse);
 			if (typeof value !== "string" || typeof name !== "string"){
 				hasDynamicAttrs = true;
 			};
-			return {
-				"name": name,
-				"value": value
-			};
-		});		
-		meta.attrs = utils.keyValueToObj(attrsArr, 'name', 'value');
+			return {name, value};
+		});
+		meta.attrs = attrsArr;
 		if (node.value){
-			meta.path = valueMgr.parse(node.value.path, {
+			meta.value = valueMgr.parse(node.value.path, {
 				escaped: node.value.escaped
 			});
-		};
-		meta.content = readTpl(node, null, meta);		
+		};				
+		meta.content = readTpl(node, null, parents.concat([meta]));		
 		if (meta.content.some(isScope)){
-			meta.isScopeHolder = true;			
+			isScopeHolder = true;			
 		};
+		const parentMeta = parents[parents.length - 1];
 		if (parentMeta && parentMeta.type === "scope"){
-			meta.isScopeItem = true;
+			isScopeItem = true;
 		};
 		if (
 				!hasDynamicAttrs 
 				&& !meta.eid
-				&& !meta.isRootNode 
-				&& !meta.isScopeHolder 
-				&& !meta.isScopeItem
-				&& !meta.path
+				&& !isRootNode 
+				&& !isScopeHolder 
+				&& !isScopeItem
+				&& !meta.value
 			){
 			return null;
 		};
 		return meta;
-	};
+	};	
 
 	render(context: FgInstance, data: any): string{
 		const meta = this;
-		if (meta.isScopeHolder){
-			meta.root.currentScopeHolder = meta;		
-		};
-		const attrsArr = utils.objToKeyValue(meta.attrs, 'name', 'value');
+		// if (meta.isScopeHolder){
+		// 	meta.root.currentScopeHolder = meta;		
+		// };
+		const attrsArr = meta.attrs;
 		let attrObj: any = {};
 		attrsArr.forEach(function(attr){
-			const name = new StrTpl(attr.name).render(valueMgr.resolveAndRender.bind(null, meta, data));
-			const value = new StrTpl(attr.value).render(valueMgr.resolveAndRender.bind(null, meta, data));
+			const name = strTpl.render(attr.name, valueMgr.render.bind(null, meta, data));
+			const value = strTpl.render(attr.value, valueMgr.render.bind(null, meta, data));
 			attrObj[name] = value;
 		});
 		let triggers: string[][] = [];
-		context.gapStorage.setTriggers(meta, triggers);
-		const inner = meta.path 
-			? valueMgr.render(meta, data, this.resolvedPath)
+		const inner = meta.value 
+			? valueMgr.render(meta, data, this.value)
 			: context.renderTpl(meta.content, meta, data);
 		return utils.renderTag({
 			"name": meta.tagName,
@@ -105,19 +127,19 @@ export default class GRaw extends Gap{
 		// to do value update
 		/*var attrData = utils.objPath(meta.scopePath, context.data);
 		var renderedAttrs = utils.renderAttrs(meta.attrs, attrData);*/
-		const attrsArr = utils.objToKeyValue(meta.attrs, 'name', 'value');
+		const asRaw = meta as GRaw;
+		const attrsArr = utils.objToKeyValue(asRaw.attrs, 'name', 'value');
 		let attrObj: any = {};
 		attrsArr.forEach(function(attr){
-			const name = new StrTpl(attr.name).render(valueMgr.render.bind(null, meta, context.data));
-			const value = new StrTpl(attr.value).render(function(path){
-				const resolvedPath = valueMgr.resolvePath(meta, path);		
-				return valueMgr.render(meta, context.data, resolvedPath);
+			const name = strTpl.render(attr.name, valueMgr.render.bind(null, meta, context.data));
+			const value = strTpl.render(attr.value, function(path){
+				return valueMgr.render(meta, context.data, asRaw.value);
 			});
 			attrObj[name] = value;
 		});
 		const dom = meta.getDom()[0];
-		if (meta.path && meta.path.path.join('-') === scopePath.join('-')){
-			dom.innerHTML = meta.path.escaped 
+		if (asRaw.value && asRaw.value.path.join('-') === scopePath.join('-')){
+			dom.innerHTML = asRaw.value.escaped 
 				? utils.escapeHtml(value)
 				: value;
 		};

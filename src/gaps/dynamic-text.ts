@@ -2,40 +2,49 @@
 
 import * as utils from '../utils';  
 import * as valueMgr from '../valueMgr';  
-import {StrTpl, read as readTpl} from '../strTpl';  
-import {Gap, render} from '../client/gapClassMgr';  
+import * as strTpl from '../strTpl';  
+import {Gap, IGapData} from '../client/gapClassMgr';  
 import {FgInstance} from '../client/fgInstance';  
 import {IAstNode} from '../tplMgr';
 import GData from './data';
+import {IDataPath, IDataQuery} from '../valueMgr';
+
+interface IDynamicTextParsedData extends IGapData {
+	tpl: strTpl.StrTplData;
+};
 
 export default class GDynamicText extends Gap{
 
-	tpl: any;
+	tpl: strTpl.StrTplData;
 	type: string = "dynamicText";
 
-	static parse(node: IAstNode){
+	static parse(node: IAstNode, parents: IGapData[]): IGapData{
 		if (node.type !== "text"){
 			return null;
 		};
-		var tpl = readTpl(node.text, valueMgr.parse);
+		const tpl = strTpl.parse(node.text, ref => {
+			const parsedPath = valueMgr.parse(ref);
+			const resolvedQuery = valueMgr.resolvePath(parsedPath, parents);
+			return resolvedQuery;
+		});
 		if (typeof tpl === "string"){
 			return null;
 		};
-		var meta: GDynamicText = {} as GDynamicText;
-		meta.type = "dynamicText";
-		meta.tpl = tpl; 
+		const meta: IDynamicTextParsedData = {
+			type: "dynamicText",
+			tpl: tpl as strTpl.StrTplData
+		};
 		return meta;
 	};
 
 	render(context: FgInstance, data: any){
-		var meta = this;
-		var tpl = new StrTpl(meta.tpl, valueMgr.parse);
-		return tpl.render(function(path){
-			var dataMeta = {
+		const meta = this;
+		return strTpl.render(meta.tpl, function(dataSource: IDataQuery){
+			const dataMeta = {
 				"type": "data",
-				"path": path			
+				"value": dataSource			
 			};
-			var itemMeta = new GData(context, dataMeta, meta.parent);
+			const itemMeta = new GData(context, dataMeta, meta.parent);
 			return itemMeta.render(context, data);
 		});
 	};

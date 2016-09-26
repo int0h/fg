@@ -57,23 +57,23 @@ $fg.byDom = function(domNode: HTMLElement): FgInstance{
 	return getFgByIid(iid);	
 };
 
-$fg.gapClosest = function(domNode: HTMLElement): Gap{
-	while (true){
-		idRe.lastIndex = 0;
-		let res = idRe.exec(domNode.id);
-		if (!res){
-			domNode = domNode.parentElement;
-			if (!domNode){
-				return null;
-			};
-			continue;
-		};
-		const iid = parseInt(res[1]);
-		const fg = getFgByIid(iid);
-		const gid = parseInt(res[2]);
-		return fg.gapStorage.gaps[gid];
-	};
-};
+// $fg.gapClosest = function(domNode: HTMLElement): Gap{
+// 	while (true){
+// 		idRe.lastIndex = 0;
+// 		let res = idRe.exec(domNode.id);
+// 		if (!res){
+// 			domNode = domNode.parentElement;
+// 			if (!domNode){
+// 				return null;
+// 			};
+// 			continue;
+// 		};
+// 		const iid = parseInt(res[1]);
+// 		const fg = getFgByIid(iid);
+// 		const gid = parseInt(res[2]);
+// 		return fg.gapStorage.gaps[gid];
+// 	};
+// };
 
 $fg.classes = fgClassDict;
 

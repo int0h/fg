@@ -1,7 +1,7 @@
 "use strict";
 
 import * as gapServer from './gapServer';
-import {Gap} from './client/gapClassMgr';
+import {Gap, IGapData} from './client/gapClassMgr';
 import renderTplUnbound from './tplRender';
 export var renderTpl = renderTplUnbound.bind(null, gapServer);
 var mj = require('micro-jade');
@@ -19,21 +19,16 @@ export interface IAstNode {
 	};
 };
 
-export type ITplPart = string | Gap;
+export type ITplPart = string | IGapData;
 
 export type Tpl = ITplPart[];
 
-function parseGap(node: IAstNode, html: string, parentMeta: Gap): Gap{
-	const tagMeta = gapServer.parse(node, html, parentMeta);
-	return tagMeta;
-};
-
-export function readTpl(ast: IAstNode, code?: string, parentMeta?: Gap): Tpl{
+export function readTpl(ast: IAstNode, code: string, parents: IGapData[]): Tpl{	
 
 	function iterate(children: IAstNode[]): Tpl{
-		let parts: (string | Gap)[] = [];
+		let parts: ITplPart[] = [];
 		children.forEach(function(node, id){
-			const tagMeta = parseGap(node, code, parentMeta);
+			const tagMeta = gapServer.parse(node, parents, code);
 			if (tagMeta){				
 				parts.push(tagMeta);				
 				return; 

@@ -6,25 +6,29 @@ var selfClosingTags = ["area", "base", "br", "col",
 	"meta", "param", "source", "track", 
 	"wbr"];
 
-interface IAttr{
+export interface IAttr{
 	name: string;
 	value: string;
 };
 
+export interface IAttrs {
+	[key: string]: string
+}
+
 export interface ITagOpts{
-	attrs: any;
+	attrs: IAttrs | IAttr[];
 	name: string;
 	innerHTML: string;
 };
 
 export function renderTag(tagInfo: ITagOpts): string{
-	let attrs = tagInfo.attrs;
-	if (!Array.isArray(attrs)){
-		attrs = utils.objToKeyValue(attrs, 'name', 'value');
+	let attrsArr: IAttr[] = tagInfo.attrs as IAttr[];
+	if (!Array.isArray(attrsArr)){
+		attrsArr = utils.objToKeyValue(attrsArr, 'name', 'value');
 	};
 	let attrCode = "";
-	if (attrs.length > 0){
-	    attrCode = " " + attrs.map(function(attr: IAttr){
+	if (attrsArr.length > 0){
+	    attrCode = " " + attrsArr.map(function(attr: IAttr){
 		  return attr.name + '="' + attr.value + '"';
 	   }).join(' ');
 	};

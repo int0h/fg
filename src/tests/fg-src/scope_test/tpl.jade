@@ -10,14 +10,14 @@ scope.noScope
 //- no array scope
 .person
     scope.person
-        data.name
-        data.dob
+        data(path="$scope.name")
+        data(path="$scope.dob")
 //- nested scope
 scope.nested
-    | Kind: #{kind}
+    | Kind: #{$scope.kind}
     scope.values
         .subScopeItem
-            data
+            data(path="$scope")
 //- named scopes
 scope#named.named
     scope#subNamed.subNamed

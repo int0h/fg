@@ -1,6 +1,7 @@
 "use strict";
 
 import * as utils from './utils';
+import {IGapData, IScopeTable, Gap} from './client/gapClassMgr';
 
 export type IValuePathItem = string;
 
@@ -10,8 +11,9 @@ export interface IDataQuery {
     path: IPath;
 	source: string;
 	escaped: boolean;
-	scopeName: string;
 };
+
+export type IDataPath = string[]; 
 
 export interface IScope{
 	path: IPath;
@@ -32,19 +34,11 @@ export function read(parts: Array<string>, extraInfo?: Object): IDataQuery{
 	let source = "data";
 	const first = parts[0];
 	let path = parts;
-	let scopeName: string = null;
-	if (/^[\$]/.test(first)){
-		path = path.slice(1);
-		if (first[0] === "$"){
-			source = "scope";
-			scopeName = first.slice(1); 			
-		};
-	};
+	let scopeName: string = null;	
 	const res: IDataQuery = {
 		"source": source,
 		"path": path,
-		"escaped": true,
-		"scopeName": scopeName
+		"escaped": true
 	};
 	if (extraInfo){
 		utils.extend(res, extraInfo);
@@ -87,39 +81,79 @@ function findScopes(meta: any): IScopeSet{
 	};
 };
 
+export function calcPath(gap: Gap, dataSource: IDataQuery): IDataQuery{
+	let idList: number[] = [];
+	let cur = gap;
+	while (cur){
+		if ("scopeId" in cur){
+			idList.push((cur as any).scopeId as number);
+		};
+		cur = cur.parent;
+	};
+	idList.reverse();
+	const newPath = dataSource.path.map((part, id) => {
+		if (part === "*"){
+			return idList.toString();
+		};
+		return part;
+	}); 
+	return {
+		escaped: dataSource.escaped,
+		source: dataSource.source,
+		path: newPath
+	};
+};
+
+function getScopeTable(parents: IGapData[]): IScopeTable{
+	let res: IScopeTable = {};
+	parents.forEach(function(parent: IGapData){
+		if (parent.scope){
+			res[parent.scope.name] = parent.scope.path;
+		};
+	});
+	return res;
+};
+
+function relativePath(fromPath: IPath, path: IPath): IPath{
+	var resPath = fromPath.slice();
+	path.forEach(function(part){
+		if (part === "^"){
+			resPath.pop();
+			return; 
+		};
+		resPath.push(part);
+	});
+	return resPath;
+};
+
+export function resolveDataPath(path: IPath, parents: IGapData[]): IPath{
+	const firstPart = path[0];
+	if (firstPart && firstPart[0] === "$"){
+		const scopeName = firstPart.slice(1); 
+		const scopeTable = getScopeTable(parents);		
+		const scopePath = scopeTable[scopeName];
+		if (!scopePath){
+			throw new Error("Scope [" + scopeName + "] not found!");
+		};
+		const scopeItemPath = scopePath.concat(['*']);
+		return relativePath(scopeItemPath, path.slice(1));
+	};
+	return path;
+};
+
 /**
  * Resolves the path removing all operators from path (e.g. $up).
  * @param {Object} meta - gap meta connected to the path.
  * @param {Object} path - value path object.
  * @returns {Object} resolved path object.
  */
-export function resolvePath(meta: any, dataQuery: IDataQuery): IDataQuery{
-	const scopeSet = findScopes(meta);
+export function resolvePath(dataQuery: IDataQuery, parents: IGapData[]): IDataQuery{
 	let res: IDataQuery = {
 		path: null,
 		source: dataQuery.source,
-		escaped: dataQuery.escaped,
-		scopeName: dataQuery.scopeName
+		escaped: dataQuery.escaped
 	};
-	let curScopePath: IPath; 
-	if (dataQuery.source === "scope"){
-		curScopePath = scopeSet[dataQuery.scopeName];
-	}else{
-		const defaultScope = scopeSet[''];
-		curScopePath = defaultScope
-			? defaultScope
-			: []; 
-	};
-	res.path = curScopePath.slice();		
-	dataQuery.path.forEach(function(key){
-		if (typeof key[0] !== "^"){
-			res.path.push(key);			
-			return;
-		};
-		if (key === "^"){
-			res.path.pop();
-		};
-	});
+	res.path = resolveDataPath(dataQuery.path, parents);
 	return res;
 };
 
@@ -130,13 +164,14 @@ export function resolvePath(meta: any, dataQuery: IDataQuery): IDataQuery{
  * @param {Object} valuePath - value path to be fetched.
  * @returns {any} fetched data.
  */
-export function getValue(meta: any, data: Object, valuePath: IDataQuery): any{
+export function getValue(gap: Gap, data: Object, valuePath: IDataQuery): any{
 	const sourceTable: any = {
 		"data": data,
-		"meta": meta
+		"meta": gap
 	};
 	const sourceData: string = sourceTable[valuePath.source];
-	const res = utils.objPath(valuePath.path, sourceData);
+	const realPath = calcPath(gap, valuePath);
+	const res = utils.objPath(realPath.path, sourceData);
 	return res;
 };
 
@@ -147,9 +182,13 @@ export function getValue(meta: any, data: Object, valuePath: IDataQuery): any{
  * @param {Object} resolvedPath - resolved path.
  * @returns {string} rendered string.
  */
-export function render(meta: any, data: Object, resolvedPath: IDataQuery): string{
-	var text = getValue(meta, data, resolvedPath).toString(); 
-	if (resolvedPath.escaped){
+export function render(gap: Gap, data: Object, dataSource: IDataQuery): string{
+	const value = getValue(gap, data, dataSource);
+	if (value === undefined){
+		throw new Error("Cannot render: [" + dataSource.path.join('.') + "] is undefined!");
+	};
+	let text = value.toString(); 
+	if (dataSource.escaped){
 		text = utils.escapeHtml(text);		
 	};
 	return text;
@@ -162,7 +201,7 @@ export function render(meta: any, data: Object, resolvedPath: IDataQuery): strin
  * @param {Object} path - unresolved path.
  * @returns {string} rendered string.
  */
-export function resolveAndRender(meta: any, data: Object, path: IDataQuery){
-	var resolvedPath = resolvePath(meta, path);
-	return render(meta, data, resolvedPath);
-};
+// export function resolveAndRender(meta: IGapData, data: Object, path: IDataQuery, parents: IGapData[]){
+// 	var resolvedPath = resolvePath(path, parents);
+// 	return render(meta, data, resolvedPath);
+// };

@@ -40,7 +40,7 @@ export class FgMgr{
 	readFg(name: string, sources: IFgDeclaration){
 		const jadeCode = sources.tpl;
 		const mjAst = microJade.parse(jadeCode);
-		const tpl = tplMgr.readTpl(mjAst);
+		const tpl = tplMgr.readTpl(mjAst, null, []);
 		let classFn: Function;
 		if (sources.classFn){
 			const code = sources.classFn;

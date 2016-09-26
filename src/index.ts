@@ -59,7 +59,7 @@ export function loadDir(fgMgr: FgMgr, path: string){
 
 export function buildTest(cb: Function){
 	const testDir = fgLibPath + '/src/tests/';
-	buildRuntime(fgLibPath + '/build/tests/runtime.js', function(err: Error){
+	buildRuntime(fgLibPath + '/build/tests/build/runtime.js', function(err: Error){
 		if (err){
 			cb(err);
 			return;

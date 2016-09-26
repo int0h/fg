@@ -18,20 +18,13 @@ interface ITplContext{
  * @param {Object} meta - meta modifier.
  * @returns {string} result code.
  */
-export default function renderTpl(tpl: Tpl, parent: Gap, data: any, metaMod: Function | Object){
+export default function renderTpl(tpl: Tpl, parent: Gap, data: any){
 	const self: ITplContext = this;
 	let parts = tpl.map((part, partId)=>{
 		if (typeof part === "string"){
 			return part;
 		};
-		let partMeta = utils.simpleClone(part);
-		if (metaMod){
-			if (typeof metaMod === "function"){
-				partMeta = (metaMod as Function)(partMeta, partId);
-			}else{
-				partMeta = utils.extend(partMeta, metaMod || {});			
-			};	
-		};		
+		let partMeta = utils.simpleClone(part);	
 		return self.renderGap(self.context, parent, data, partMeta);
 	});
 	const code = parts.join('');

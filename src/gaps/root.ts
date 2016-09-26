@@ -2,20 +2,29 @@
 
 import * as utils from '../utils';  
 import * as valueMgr from '../valueMgr';  
-import {Gap} from '../client/gapClassMgr';  
+import {Gap, IGapData} from '../client/gapClassMgr';  
 import {FgInstance} from '../client/fgInstance';  
-import {IAstNode} from '../tplMgr';
+import {IAstNode, Tpl} from '../tplMgr';
+
+export interface IRootParsedData extends IGapData {
+	content: Tpl;
+	scopePath: any;
+};
 
 export default class GRoot extends Gap{
+	fg: FgInstance;
+	content: Tpl;
 	scopePath: any;
 	type: string = "root";
+
+	public static isVirtual = true; 
 
 	static parse(node: IAstNode): Gap{
 		return null;
 	};
 
 	render(context: FgInstance, data: any): string{
-		throw new Error('root gap should not be rendered');
+		return context.renderTpl(this.content, this, data);
 	};
 
 };

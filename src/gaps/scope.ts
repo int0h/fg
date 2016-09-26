@@ -2,73 +2,90 @@
 
 import * as utils from '../utils';  
 import * as valueMgr from '../valueMgr';  
-import {Gap, render} from '../client/gapClassMgr';  
+import {Gap, render, IGapData} from '../client/gapClassMgr';  
 import {FgInstance} from '../client/fgInstance';  
-import {IAstNode, readTpl} from '../tplMgr';
+import {IAstNode, readTpl, Tpl} from '../tplMgr';
 import * as anchorMgr from '../anchorMgr';
-import GScopeItem from './scope-item';
+import {default as GScopeItem, IScopeItemParsedData} from './scope-item';
+import {IDataPath, IDataQuery, IScope} from '../valueMgr';
 
-function renderScopeContent(context: FgInstance, scopeMeta: Gap, scopeData: any, data: any, idOffset: number){
+function renderScopeContent(context: FgInstance, scopeMeta: GScope, scopeData: any, data: any, idOffset: number){
 	const isArray = Array.isArray(scopeData);
 	if (!isArray){
 		scopeData = [scopeData];
 	};
 	const parts = scopeData.map(function(dataItem: any, id: number){
-		let itemMeta = scopeMeta;
-		const path = isArray
-			? valueMgr.read([(id + idOffset).toString()])
-			: valueMgr.read([]);
-		let itemCfg: any = {
+		let dataSource: IDataQuery = {
+			escaped: false,
+			source: "data",
+			path: scopeMeta.scope.path
+		};		
+		dataSource.path = isArray
+			? dataSource.path.concat(["*"])
+			: dataSource.path;
+		let itemCfg: IScopeItemParsedData = {
 			"type": "scopeItem",
 			"isVirtual": true,
-			"path": path,
-			"content": scopeMeta.content
+			"dataSource": dataSource,
+			"content": scopeMeta.content,
+			"scopeId": id
 		};
 		if (scopeMeta.eid){
 			itemCfg.eid = scopeMeta.eid + '-item';
 		};
-		itemMeta = new GScopeItem(context, itemCfg, itemMeta);		
+		const itemMeta = new GScopeItem(context, itemCfg, scopeMeta);		
 		return itemMeta.render(context, data);
 	});
 	return parts;
 };
 
-export default class GScope extends Gap{
-	items: Gap[];
-	scope: valueMgr.IScope;
-	type: string = "scope";
+interface IScopeParsedData extends IGapData {
+	scope: IScope;
+	content: Tpl;
+};
 
-	static parse(node: IAstNode, html: string): Gap{
+export default class GScope extends Gap{
+	content: Tpl;
+	scope: IScope;
+	items: Gap[];
+	type: string = "scope";
+	
+	public static isVirtual = true; 
+
+	static parse(node: IAstNode, parents: IGapData[], html?: string): IGapData{
 		if (node.tagName !== "scope"){
 			return null;
 		};
-		const meta: GScope = {} as GScope;
-		meta.type = "scope";
-		meta.isVirtual = true;
-		meta.path = utils.parsePath(node);		
-		meta.content = readTpl(node, html, meta);
-		meta.eid = node.attrs.id || null;
+		const scopeName: string = "scope";
+		const parsedPath = utils.parsePath(node);		
+		const scopeDataScource = valueMgr.resolvePath(parsedPath, parents);
+		const scopePath = scopeDataScource.path;
+		const meta: IScopeParsedData = {
+			type: "scope",
+			eid: node.attrs.id || null,
+			scope: {
+				name: scopeName,
+				path: scopePath,
+			},
+			content: null
+		};
+		meta.content = readTpl(node, null, parents.concat([meta]));
 		return meta;
 	};
 
 	render(context: FgInstance, data: any): string{
 		const meta = this;
 		meta.items = [];
-		const scopeData = valueMgr.getValue(meta, data, this.resolvedPath);
-		this.scope = {
-			path: this.resolvedPath.path,
-			name: meta.eid || ''
-		};
+		const scopeData = utils.objPath(this.scope.path, data);		
 		const anchorCode = anchorMgr.genCode(context, meta);		
 		const parts = renderScopeContent(context, meta, scopeData, data, 0);	
 		return parts.join('\n') + anchorCode;
 	};
 
-	update(context: FgInstance, meta: Gap, scopePath: any, value: any, oldValue: any){
+	update(context: FgInstance, meta: GScope, scopePath: any, value: any, oldValue: any){
 		value = value || [];
 		oldValue = oldValue || [];
 		for (let i = value.length; i < oldValue.length; i++){
-			context.gapStorage.removeScope(scopePath.concat([i]));
 		};
 		if (value.length > oldValue.length){
 			const dataSlice = value.slice(oldValue.length);

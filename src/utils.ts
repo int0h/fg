@@ -91,6 +91,9 @@ export function extend(dest: any, src: any): any{
 };
 
 export function parsePath(parsedNode: IAstNode): valueMgr.IDataQuery{
+	if (parsedNode.attrs.path){
+		return valueMgr.parse(parsedNode.attrs.path.value);
+	};
 	if (parsedNode.attrs.class){
 		const parts = parsedNode.attrs.class.value.split(' ');
 		const parsed = valueMgr.read(parts);

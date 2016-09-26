@@ -7,9 +7,9 @@ import {Tpl} from '../tplMgr';
 import {Gap} from './gapClassMgr';
 import {FgClass} from './fgClass';
 import * as utils from '../utils';
-import GapStorage from './gapStorage';
 import * as globalEvents from './globalEvents';
-import GRoot from '../gaps/root';
+import {default as GRoot, IRootParsedData} from '../gaps/root';
+import GFg from '../gaps/fg';
 const helper = require('./helper');
 
 export const fgInstanceTable: FgInstance[] = [];
@@ -21,11 +21,10 @@ export class FgInstanceBase{
 	code: string;	
 	dom: HTMLElement[];
 	data: any;
-	rootGap: Gap;
+	rootGap: GRoot;
 	selfGap: Gap;
 	parent: FgInstance;
 	eventEmitter: EventEmitter;
-	gapStorage: GapStorage;
 	childFgs: FgInstance[];
 
 	constructor(fgClass: FgClass, parent: FgInstance){
@@ -36,7 +35,6 @@ export class FgInstanceBase{
 		this.code = null;
 		this.parent = parent || null;
 		this.eventEmitter = new EventEmitter(fgClass.eventEmitter);
-		this.gapStorage = new GapStorage(this);
 		this.childFgs = [];
 		fgInstanceTable.push(this);	
 	};
@@ -75,63 +73,64 @@ export class FgInstanceBase{
 	getHtml(data: any, meta?: Gap): string{
 		this.data = data;
 		this.selfGap = meta;
-		let rootGap = new GRoot(this, meta);
-		rootGap.type = "root";
-		rootGap.isVirtual = true;
-		rootGap.fg = this;
-		this.rootGap = rootGap as Gap;
+		this.rootGap = new GRoot(this, null, null);
+		this.rootGap.type = "root";
+		this.rootGap.isVirtual = true;
+		this.rootGap.fg = this;
 		const cookedData = this.fgClass.cookData(data);
-		return this.renderTpl(this.fgClass.tpl, rootGap as Gap, cookedData, metaMap.bind(null, this));
+		return this.renderTpl(this.fgClass.tpl, this.rootGap as Gap, cookedData);
 	};
 
 	update(scopePath: string[], newValue: any): FgInstance{
-		if (arguments.length === 0){
-			return this.update([], this.data); // todo
-		};
-		if (arguments.length === 1){
-			return this.update([], arguments[0]);
-		};
-		const value: any = utils.deepClone(newValue);
-		const self = this;
-		const oldValue: any = utils.objPath(scopePath, this.data);
-		if (oldValue === value){
-			return this;
-		};	
-		this.emit('update', scopePath, newValue);
-		if (scopePath.length > 0){
-			utils.objPath(scopePath, this.data, value);
-		}else{
-			this.data = value;
-		}
-		const scope = this.gapStorage.byScope(scopePath);
-		const gaps = scope.target;
-		gaps.forEach(function(gap: Gap){
-			gap.update(self, gap, scopePath, value, oldValue);
-		});
-		scope.parents.forEach(function(parentNode: any){
-			parentNode.data.gaps.forEach(function(parentGap: Gap){
-				if (parentGap.type === "fg"){
-					const subPath = scopePath.slice(parentGap.scopePath.path.length);
-					//var subVal = utils.objPath(subPath, self.data);
-					parentGap.fg.update(subPath, newValue);
-				};			
-			});
-		});
-		scope.subs.forEach(function(sub){
-			const subVal = utils.objPath(sub.path, self.data);	
-			const subPath = sub.path.slice(scopePath.length);
-			const oldSubVal = utils.objPath(subPath, oldValue);
-			if (subVal === oldSubVal){
-				return;
-			};
-			sub.gaps.forEach(function(gap: Gap){
-				if (self.gapStorage.gaps.indexOf(gap) < 0){
-					return;
-				};
-				gapClassMgr.update(self, gap, sub.path, subVal, oldSubVal);
-			});
-		});
 		return this;
+		// if (arguments.length === 0){
+		// 	return this.update([], this.data); // todo
+		// };
+		// if (arguments.length === 1){
+		// 	return this.update([], arguments[0]);
+		// };
+		// const value: any = utils.deepClone(newValue);
+		// const self = this;
+		// const oldValue: any = utils.objPath(scopePath, this.data);
+		// if (oldValue === value){
+		// 	return this;
+		// };	
+		// this.emit('update', scopePath, newValue);
+		// if (scopePath.length > 0){
+		// 	utils.objPath(scopePath, this.data, value);
+		// }else{
+		// 	this.data = value;
+		// }
+		// const scope = this.gapStorage.byScope(scopePath);
+		// const gaps = scope.target;
+		// gaps.forEach(function(gap: Gap){
+		// 	gap.update(self, gap, scopePath, value, oldValue);
+		// });
+		// scope.parents.forEach(function(parentNode: any){
+		// 	parentNode.data.gaps.forEach(function(parentGap: Gap){
+		// 		if (parentGap.type === "fg"){
+		// 			var fgGap = parentGap as GFg;
+		// 			const subPath = scopePath.slice(fgGap.dataSource.path.length);
+		// 			//var subVal = utils.objPath(subPath, self.data);
+		// 			fgGap.fg.update(subPath, newValue);
+		// 		};			
+		// 	});
+		// });
+		// scope.subs.forEach(function(sub){
+		// 	const subVal = utils.objPath(sub.path, self.data);	
+		// 	const subPath = sub.path.slice(scopePath.length);
+		// 	const oldSubVal = utils.objPath(subPath, oldValue);
+		// 	if (subVal === oldSubVal){
+		// 		return;
+		// 	};
+		// 	sub.gaps.forEach(function(gap: Gap){
+		// 		if (self.gapStorage.gaps.indexOf(gap) < 0){
+		// 			return;
+		// 		};
+		// 		gapClassMgr.update(self, gap, sub.path, subVal, oldSubVal);
+		// 	});
+		// });
+		// return this;
 	};
 
 	cloneData(){
@@ -144,7 +143,6 @@ export class FgInstanceBase{
 		});
 		this.code = '';
 		this.data = null;
-		this.gapStorage = null;
 		this.childFgs = [];
 	};
 
@@ -163,7 +161,6 @@ export class FgInstanceBase{
 
 	rerender(data: any){
 		this.clear();
-		this.gapStorage = new GapStorage(this);
 		var dom = this.getDom()[0];
 		this.code = this.getHtml(data, null);
 		dom.outerHTML = this.code; // doesnt work with multi root
@@ -193,22 +190,14 @@ export class FgInstanceBase{
 	};
 
 	gap(id: string){
-		return this.gaps(id)[0];
 	};
 
 	gaps(id: string){
-		var gaps = this.gapStorage.byEid(id);
-		if (gaps){
-			return gaps;
-		};	
+			
 	};
 
 	sub(id: string){
-		var gap = this.gap(id);
-		if (!gap){
-			return null;
-		};
-		return gap.fg || null; 
+		
 	};
 };
 
@@ -219,29 +208,6 @@ export class FgInstance extends FgInstanceBase{
 		};
 		return new fgClass.createFn(fgClass, parent);		
 	};
-};
-
-function getClasses(meta: Gap){
-	if (!meta || !meta.attrs || !meta.attrs.class){
-		return [];
-	};
-	if (Array.isArray(meta.attrs.class)){
-		return meta.attrs.class;
-	};		
-	return meta.attrs.class.split(' ');
-};
-
-function metaMap(fg: FgInstance, metaPart: any){
-	var res: any = utils.simpleClone(metaPart);
-	var classes = getClasses(res);
-	var fg_cid = "fg-cid-" + fg.fgClass.id;
-	res.attrs = utils.simpleClone(metaPart.attrs);
-	if (Array.isArray(res.attrs.class)){
-		res.attrs.class = ['fg', ' ', fg_cid, ' '].concat(classes);
-		return res;	
-	};	
-	res.attrs.class = ['fg', fg_cid].concat(classes).join(' ');
-	return res;
 };
 
 function createScopeHelper(fg: FgInstance, obj: any, scopePath: string[]){
