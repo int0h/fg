@@ -5,13 +5,13 @@ import * as globalEvents from './globalEvents';
 import * as fgInstanceModule from './fgInstance';
 import {FgInstance} from './fgInstance';
 import {Gap} from './gapClassMgr';
-import {Tpl} from '../tplMgr';
+import {Template, TplData} from '../tplMgr';
 
 export const fgClassTable: FgClass[] = [];
 export const fgClassDict: any = {};
 
 export interface IFgClassOpts{
-	tpl: Tpl;
+	tpl: TplData;
 	classFn: Function;
 	name: string;
 };
@@ -19,7 +19,7 @@ export interface IFgClassOpts{
 export class FgClass{
 	id: number;
 	instances: fgInstanceModule.FgInstance[];
-	tpl: Tpl;
+	tpl: Template;
 	name: string;
 	eventEmitter: EventEmitter;
 	createFn: Function;

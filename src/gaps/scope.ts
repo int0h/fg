@@ -3,8 +3,9 @@
 import * as utils from '../utils';  
 import * as valueMgr from '../valueMgr';  
 import {Gap, render, IGapData} from '../client/gapClassMgr';  
-import {FgInstance} from '../client/fgInstance';  
-import {IAstNode, readTpl, Tpl} from '../tplMgr';
+import {FgInstance} from '../client/fgInstance'; 
+import {IAstNode} from '../outerTypes'; 
+import {Template, TplData} from '../tplMgr';
 import * as anchorMgr from '../anchorMgr';
 import {default as GScopeItem, IScopeItemParsedData} from './scope-item';
 import {IDataPath, IDataQuery, IScope} from '../valueMgr';
@@ -19,15 +20,15 @@ function renderScopeContent(context: FgInstance, scopeMeta: GScope, scopeData: a
 			escaped: false,
 			source: "data",
 			path: scopeMeta.scope.path
-		};		
-		dataSource.path = isArray
-			? dataSource.path.concat(["*"])
-			: dataSource.path;
+		};
+		if (isArray){
+			dataSource.path.push('*');
+		};
 		let itemCfg: IScopeItemParsedData = {
 			"type": "scopeItem",
 			"isVirtual": true,
 			"dataSource": dataSource,
-			"content": scopeMeta.content,
+			"content": null,
 			"scopeId": id
 		};
 		if (scopeMeta.eid){
@@ -41,16 +42,21 @@ function renderScopeContent(context: FgInstance, scopeMeta: GScope, scopeData: a
 
 interface IScopeParsedData extends IGapData {
 	scope: IScope;
-	content: Tpl;
+	content: TplData;
 };
 
 export default class GScope extends Gap{
-	content: Tpl;
+	content: Template;
 	scope: IScope;
 	items: Gap[];
 	type: string = "scope";
 	
-	public static isVirtual = true; 
+	public static isVirtual = true;
+
+	constructor (context: FgInstance, parsedMeta: IGapData, parent: Gap){
+		super(context, parsedMeta, parent);
+		this.paths = [this.scope.path];
+	};
 
 	static parse(node: IAstNode, parents: IGapData[], html?: string): IGapData{
 		if (node.tagName !== "scope"){
@@ -69,7 +75,7 @@ export default class GScope extends Gap{
 			},
 			content: null
 		};
-		meta.content = readTpl(node, null, parents.concat([meta]));
+		meta.content = Template.parse(node, null, parents.concat([meta]));
 		return meta;
 	};
 

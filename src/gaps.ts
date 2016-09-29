@@ -1,6 +1,6 @@
 "use strict";
 
-import {Gap} from './client/gapClassMgr';
+import {Gap, GapClass} from './client/gapClassMgr';
 
 import {default as content} from './gaps/content';
 import {default as data} from './gaps/data';
@@ -10,8 +10,9 @@ import {default as raw} from './gaps/raw';
 import {default as scope} from './gaps/scope';
 import {default as scopeItem} from './gaps/scope-item';
 
+
 export interface IGaps{
-    [key: string]: typeof Gap;
+    [key: string]: GapClass;
 };
 
 const gaps: IGaps = {

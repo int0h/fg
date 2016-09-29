@@ -63,13 +63,6 @@ export class FgInstanceBase{
 		// return this.dom;
 	};
 
-	renderTpl(tpl: Tpl, parent: Gap, data: any, meta?: Gap){
-		return renderTpl.call({
-			"renderGap": gapClassMgr.render,
-			"context": this
-		}, tpl, parent, data, meta);
-	};
-
 	getHtml(data: any, meta?: Gap): string{
 		this.data = data;
 		this.selfGap = meta;

@@ -6,7 +6,8 @@ import * as valueMgr from '../valueMgr';
 import * as strTpl from '../strTpl';  
 import {Gap, IGapData} from '../client/gapClassMgr';  
 import {FgInstance} from '../client/fgInstance';  
-import {IAstNode, readTpl, Tpl} from '../tplMgr';
+import {IAstNode} from '../outerTypes';
+import {Template, TplData} from '../tplMgr';
 import {IDataPath, IDataQuery} from '../valueMgr';
 
 function isScope(item: Gap){
@@ -16,11 +17,11 @@ function isScope(item: Gap){
 	return item.type === "scope";
 };
 
-interface IRawParsedData extends IGapData {
+export interface IRawParsedData extends IGapData {
 	value: IDataQuery;
 	tagName: string;
 	attrs: RawAttrs;
-	content: Tpl;
+	content: TplData;
 };
 
 export interface IRawAttr {
@@ -32,13 +33,30 @@ export type RawAttrs = IRawAttr[];
 
 export default class GRaw extends Gap{
 	type: string = "raw";
-	value: IDataQuery;
+	value: IDataQuery = null;
 	tagName: string;
-	attrs: RawAttrs;
-	content: Tpl;
+	attrs: RawAttrs = [];
+	content: Template;
 	
 	public static priority: number = -1;
 	public static isVirtual = false; 
+
+	constructor (context: FgInstance, parsedMeta: IRawParsedData, parent: Gap){
+		super(context, parsedMeta, parent);
+		this.content = new Template(context, parsedMeta.content, parent);		
+		this.paths = [];
+		if (this.value){
+			this.paths.push(this.value.path);
+		};
+		this.attrs.forEach(attr => {
+			if (typeof attr.name !== "string"){
+				this.paths.push(attr.name.path);
+			};
+			if (typeof attr.value !== "string"){
+				this.paths.push(attr.value.path);
+			};
+		});
+	};
 
 	static parse(node: IAstNode, parents: IGapData[], html?: string): IGapData{
 		if (node.type !== "tag"){
@@ -79,7 +97,7 @@ export default class GRaw extends Gap{
 				escaped: node.value.escaped
 			});
 		};				
-		meta.content = readTpl(node, null, parents.concat([meta]));		
+		meta.content = Template.parse(node, null, parents.concat([meta]));		
 		if (meta.content.some(isScope)){
 			isScopeHolder = true;			
 		};
@@ -115,7 +133,7 @@ export default class GRaw extends Gap{
 		let triggers: string[][] = [];
 		const inner = meta.value 
 			? valueMgr.render(meta, data, this.value)
-			: context.renderTpl(meta.content, meta, data);
+			: this.content.render(data);
 		return utils.renderTag({
 			"name": meta.tagName,
 			"attrs": attrObj,

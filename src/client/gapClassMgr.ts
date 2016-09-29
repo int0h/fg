@@ -22,6 +22,8 @@ export interface IScopeTable {
 	[key: string]: IDataPath;
 };
 
+export type GapClass = new (context: FgInstance, parsedMeta: IGapData, parent: Gap) => Gap;
+
 export abstract class Gap{
 	type: string;
 	children: Gap[] = [];
@@ -36,7 +38,6 @@ export abstract class Gap{
 	scopeTable: IScopeTable;
 
 	public static priority: number = 0;
-
 
 	constructor (context: FgInstance, parsedMeta: IGapData, parent: Gap){	
 		utils.extend(this, parsedMeta); // todo: why?

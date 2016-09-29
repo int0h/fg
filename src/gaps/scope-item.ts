@@ -4,23 +4,27 @@ import * as utils from '../utils';
 import * as valueMgr from '../valueMgr';  
 import {Gap, IGapData} from '../client/gapClassMgr';  
 import {FgInstance} from '../client/fgInstance';  
-import {IAstNode, Tpl} from '../tplMgr';
+import {IAstNode} from '../outerTypes'; 
+import {Template, TplData} from '../tplMgr';
 import {IDataPath, IDataQuery, IScope} from '../valueMgr';
+import GScope from './scope';
 
 export interface IScopeItemParsedData extends IGapData {
 	dataSource: IDataQuery;
-	content: Tpl;
+	content: TplData;
 };
 
 export default class GScopeItem extends Gap{
 	scope: valueMgr.IScope;
 	type: string = "scopeItem";
 	dataSource: IDataQuery;
-	content: Tpl;
+	content: Template;
 	scopeId: number;
 
-	static parse(node: IAstNode, parents: IGapData[]): Gap{
-		return null;
+	constructor (context: FgInstance, parsedMeta: IGapData, parent: GScope){
+		super(context, parsedMeta, parent);
+		this.paths = [this.scope.path];
+		this.content = parent.content;
 	};
 
 	render(context: FgInstance, data: any): string{
@@ -29,7 +33,7 @@ export default class GScopeItem extends Gap{
 		if (!scopeData){
 			return '';
 		};
-		return context.renderTpl(meta.content, meta, data);
+		return this.content.render(data);
 	};
 
 };

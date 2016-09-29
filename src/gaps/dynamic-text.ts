@@ -5,7 +5,7 @@ import * as valueMgr from '../valueMgr';
 import * as strTpl from '../strTpl';  
 import {Gap, IGapData} from '../client/gapClassMgr';  
 import {FgInstance} from '../client/fgInstance';  
-import {IAstNode} from '../tplMgr';
+import {IAstNode} from '../outerTypes';
 import GData from './data';
 import {IDataPath, IDataQuery} from '../valueMgr';
 

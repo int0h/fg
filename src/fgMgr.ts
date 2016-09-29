@@ -1,11 +1,11 @@
 "use strict";
 
-import * as tplMgr from './tplMgr';
+import {Template} from './tplMgr';
 const microJade = require('micro-jade');
 
 export interface IFgObject{
 	name: string;
-	tpl: tplMgr.Tpl;
+	tpl: tplMgr.TplData;
 	classFn: Function;
 	tplSource: string;
 };
@@ -40,7 +40,7 @@ export class FgMgr{
 	readFg(name: string, sources: IFgDeclaration){
 		const jadeCode = sources.tpl;
 		const mjAst = microJade.parse(jadeCode);
-		const tpl = tplMgr.readTpl(mjAst, null, []);
+		const tpl = Template.parse(mjAst, null, []);
 		let classFn: Function;
 		if (sources.classFn){
 			const code = sources.classFn;

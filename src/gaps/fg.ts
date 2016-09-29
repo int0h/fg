@@ -4,13 +4,14 @@ import * as utils from '../utils';
 import * as valueMgr from '../valueMgr';  
 import {Gap, IGapData} from '../client/gapClassMgr';  
 import {FgInstance} from '../client/fgInstance';  
-import {IAstNode, readTpl, Tpl} from '../tplMgr';
+import {IAstNode} from '../outerTypes';
+import {Template, TplData} from '../tplMgr';
 import {IDataPath, IDataQuery} from '../valueMgr';
 
 interface IFgParsedData extends IGapData {
 	dataSource: IDataQuery;
 	fgName: string;
-	content: Tpl
+	content: TplData;
 };
 
 export default class GFg extends Gap{
@@ -36,7 +37,7 @@ export default class GFg extends Gap{
 			fgName: node.tagName.slice(3),
 			dataSource: resolvedQuery,
 			eid: node.attrs.id || null,
-			content: readTpl(node, null, parents)
+			content: Template.parse(node, null, parents)
 		};
 		return meta;
 	};

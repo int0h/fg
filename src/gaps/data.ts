@@ -4,7 +4,7 @@ import * as utils from '../utils';
 import * as valueMgr from '../valueMgr';  
 import {Gap, IGapData} from '../client/gapClassMgr';  
 import {FgInstance} from '../client/fgInstance';  
-import {IAstNode} from '../tplMgr';
+import {IAstNode} from '../outerTypes';
 import {IDataPath, IDataQuery} from '../valueMgr';
 
 interface IDataParsedData extends IGapData {
