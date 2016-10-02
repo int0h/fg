@@ -3,7 +3,7 @@
 import * as gapServer from './gapServer';
 import {Gap, IGapData} from './client/gapClassMgr';
 import * as utils from './utils';
-import {FgInstance} from './client/fgInstance';
+import {Component} from './client/componentBase';
 import {IAstNode} from './outerTypes';
 import gaps from './gaps';
 
@@ -13,17 +13,15 @@ export type TplData = (string | IGapData)[];
 
 export class Template {
 	parts: (string | Gap)[] = [];
-	context: FgInstance;
 
-	constructor(context: FgInstance, tplData: TplData, parent: Gap){
-		this.context = context;
+	constructor(tplData: TplData, parent: Gap){
 		this.parts = tplData.map((part) => {
 			if (typeof part === "string"){
 				return part;
 			};
 			const gapClassName = (part as IGapData).type;
 			const GapClass = gaps[gapClassName];
-			const gap = new GapClass(context, part as IGapData, parent);	 
+			const gap = new GapClass(part as IGapData, parent);	 
 			return gap;
 		});
 	};
@@ -55,12 +53,12 @@ export class Template {
 		return iterate(ast.children);
 	};
 
-	render(data: any){
+	render(context: Component, data: any){
 		let parts: string[] = this.parts.map((part) => {
 			if (typeof part === "string"){
 				return part;
 			};			
-			return (part as Gap).render(this.context, data);
+			return (part as Gap).render(context, data);
 		});
 		const code = parts.join('');
 		return code;

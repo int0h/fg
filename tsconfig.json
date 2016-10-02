@@ -21,7 +21,11 @@
         "inlineSourceMap": true,
         "noImplicitAny": true,
         "experimentalDecorators": true,
-        "allowJs": true
+        "allowJs": true,
+        "baseUrl": ".",
+        "paths": {
+            "fg-js": ["."]
+        }
     },
     "exclude": [
         "./src/node_modules",

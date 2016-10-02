@@ -3,7 +3,7 @@
 import * as utils from '../utils';  
 import * as valueMgr from '../valueMgr';  
 import {Gap, IGapData} from '../client/gapClassMgr';  
-import {FgInstance} from '../client/fgInstance';  
+import {Component} from '../client/componentBase';  
 import {IAstNode} from '../outerTypes';
 import {Template, TplData} from '../tplMgr';
 
@@ -18,9 +18,9 @@ export default class GContent extends Gap{
 
 	public static isVirtual = true; 
 
-	constructor (context: FgInstance, parsedMeta: IContentParsedData, parent: Gap){
-		super(context, parsedMeta, parent);
-		this.content = new Template(context, parsedMeta.content, parent); 
+	constructor (parsedMeta: IContentParsedData, parent: Gap){
+		super(parsedMeta, parent);
+		this.content = new Template(parsedMeta.content, parent); 
 	};
 
 	static parse(node: IAstNode, parents: IGapData[]): IGapData{
@@ -40,7 +40,7 @@ export default class GContent extends Gap{
 		return meta;
 	};
 
-	render(context: FgInstance, data: any){
+	render(context: Component, data: any){
 		return '';//context.parent.renderTpl(context.rootGap.content, context.selfGap.parent, context.parent.data);
 	};
 

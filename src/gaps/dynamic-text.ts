@@ -4,7 +4,7 @@ import * as utils from '../utils';
 import * as valueMgr from '../valueMgr';  
 import * as strTpl from '../strTpl';  
 import {Gap, IGapData} from '../client/gapClassMgr';  
-import {FgInstance} from '../client/fgInstance';  
+import {Component} from '../client/componentBase';
 import {IAstNode} from '../outerTypes';
 import GData from './data';
 import {IDataPath, IDataQuery} from '../valueMgr';
@@ -37,14 +37,14 @@ export default class GDynamicText extends Gap{
 		return meta;
 	};
 
-	render(context: FgInstance, data: any){
+	render(context: Component, data: any){
 		const meta = this;
 		return strTpl.render(meta.tpl, function(dataSource: IDataQuery){
 			const dataMeta = {
 				"type": "data",
 				"value": dataSource			
 			};
-			const itemMeta = new GData(context, dataMeta, meta.parent);
+			const itemMeta = new GData(dataMeta, meta.parent);
 			return itemMeta.render(context, data);
 		});
 	};

@@ -3,7 +3,7 @@
 import * as utils from '../utils';  
 import * as valueMgr from '../valueMgr';  
 import {Gap, IGapData} from '../client/gapClassMgr';  
-import {FgInstance} from '../client/fgInstance';  
+import {Component} from '../client/componentBase';  
 import {IAstNode} from '../outerTypes'; 
 import {Template, TplData} from '../tplMgr';
 import {IDataPath, IDataQuery, IScope} from '../valueMgr';
@@ -21,19 +21,19 @@ export default class GScopeItem extends Gap{
 	content: Template;
 	scopeId: number;
 
-	constructor (context: FgInstance, parsedMeta: IGapData, parent: GScope){
-		super(context, parsedMeta, parent);
+	constructor (parsedMeta: IGapData, parent: GScope){
+		super(parsedMeta, parent);
 		this.paths = [this.scope.path];
 		this.content = parent.content;
 	};
 
-	render(context: FgInstance, data: any): string{
+	render(context: Component, data: any): string{
 		const meta = this;
 		const scopeData = valueMgr.getValue(meta, data, this.dataSource);		
 		if (!scopeData){
 			return '';
 		};
-		return this.content.render(data);
+		return this.content.render(context, data);
 	};
 
 };

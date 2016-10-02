@@ -3,14 +3,14 @@
 import * as utils from '../utils';  
 import * as valueMgr from '../valueMgr';  
 import {Gap, render, IGapData} from '../client/gapClassMgr';  
-import {FgInstance} from '../client/fgInstance'; 
+import {Component} from '../client/componentBase';
 import {IAstNode} from '../outerTypes'; 
 import {Template, TplData} from '../tplMgr';
 import * as anchorMgr from '../anchorMgr';
 import {default as GScopeItem, IScopeItemParsedData} from './scope-item';
 import {IDataPath, IDataQuery, IScope} from '../valueMgr';
 
-function renderScopeContent(context: FgInstance, scopeMeta: GScope, scopeData: any, data: any, idOffset: number){
+function renderScopeContent(context: Component, scopeMeta: GScope, scopeData: any, data: any, idOffset: number){
 	const isArray = Array.isArray(scopeData);
 	if (!isArray){
 		scopeData = [scopeData];
@@ -26,7 +26,6 @@ function renderScopeContent(context: FgInstance, scopeMeta: GScope, scopeData: a
 		};
 		let itemCfg: IScopeItemParsedData = {
 			"type": "scopeItem",
-			"isVirtual": true,
 			"dataSource": dataSource,
 			"content": null,
 			"scopeId": id
@@ -34,7 +33,7 @@ function renderScopeContent(context: FgInstance, scopeMeta: GScope, scopeData: a
 		if (scopeMeta.eid){
 			itemCfg.eid = scopeMeta.eid + '-item';
 		};
-		const itemMeta = new GScopeItem(context, itemCfg, scopeMeta);		
+		const itemMeta = new GScopeItem(itemCfg, scopeMeta);		
 		return itemMeta.render(context, data);
 	});
 	return parts;
@@ -53,8 +52,8 @@ export default class GScope extends Gap{
 	
 	public static isVirtual = true;
 
-	constructor (context: FgInstance, parsedMeta: IGapData, parent: Gap){
-		super(context, parsedMeta, parent);
+	constructor (parsedMeta: IGapData, parent: Gap){
+		super(parsedMeta, parent);
 		this.paths = [this.scope.path];
 	};
 
@@ -79,7 +78,7 @@ export default class GScope extends Gap{
 		return meta;
 	};
 
-	render(context: FgInstance, data: any): string{
+	render(context: Component, data: any): string{
 		const meta = this;
 		meta.items = [];
 		const scopeData = utils.objPath(this.scope.path, data);		
@@ -88,7 +87,7 @@ export default class GScope extends Gap{
 		return parts.join('\n') + anchorCode;
 	};
 
-	update(context: FgInstance, meta: GScope, scopePath: any, value: any, oldValue: any){
+	update(context: Component, meta: GScope, scopePath: any, value: any, oldValue: any){
 		value = value || [];
 		oldValue = oldValue || [];
 		for (let i = value.length; i < oldValue.length; i++){

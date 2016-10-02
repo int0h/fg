@@ -1,11 +1,11 @@
 "use strict";
 
-import {Template} from './tplMgr';
+import {Template, TplData} from './tplMgr';
 const microJade = require('micro-jade');
 
 export interface IFgObject{
 	name: string;
-	tpl: tplMgr.TplData;
+	tpl: TplData;
 	classFn: Function;
 	tplSource: string;
 };

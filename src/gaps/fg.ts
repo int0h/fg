@@ -3,7 +3,7 @@
 import * as utils from '../utils';  
 import * as valueMgr from '../valueMgr';  
 import {Gap, IGapData} from '../client/gapClassMgr';  
-import {FgInstance} from '../client/fgInstance';  
+import {Component} from '../client/componentBase';
 import {IAstNode} from '../outerTypes';
 import {Template, TplData} from '../tplMgr';
 import {IDataPath, IDataQuery} from '../valueMgr';
@@ -15,14 +15,14 @@ interface IFgParsedData extends IGapData {
 };
 
 export default class GFg extends Gap{
-	parentFg: FgInstance;
+	parentFg: Component;
 	fgName: string;
 	type: string = "fg";
 	dataSource: IDataQuery;
-	fg: FgInstance;
+	fg: Component;
 
-	constructor (context: FgInstance, parsedMeta: IGapData, parent: Gap){
-		super(context, parsedMeta, parent);
+	constructor (parsedMeta: IGapData, parent: Gap){
+		super(parsedMeta, parent);
 		this.paths = [this.dataSource.path];
 	};
 
@@ -42,7 +42,7 @@ export default class GFg extends Gap{
 		return meta;
 	};
 
-	render(context: FgInstance, data: any){
+	render(context: Component, data: any){
 		var self = this;
 		this.parentFg = context;
 		//this.renderedContent = context.renderTpl(this.content, meta, data);
@@ -60,7 +60,7 @@ export default class GFg extends Gap{
 		return fg;
 	};
 
-	update(context: FgInstance, meta: Gap, scopePath: any, value: any){
+	update(context: Component, meta: Gap, scopePath: any, value: any){
 		var node = meta.getDom()[0];
 		if (!node){
 			

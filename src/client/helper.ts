@@ -1,15 +1,14 @@
-import {FgClass, fgClassDict} from './fgClass'; 
-import {getFgByIid, FgInstance, fgInstanceTable} from './fgInstance'; 
+import {Component, fgClassDict, fgInstanceTable, ComponentClass, getFgByIid} from './componentBase'; 
 import {Gap} from './gapClassMgr'; 
 
 export interface Helper {
 	(arg: string | HTMLElement): any; 
-	byDom(dom: HTMLElement): FgInstance;
-	load(fgData: any): FgClass | FgClass[];
+	byDom(dom: HTMLElement): Component;
+	load(fgData: any): ComponentClass | ComponentClass[];
 	isFg(domNode: HTMLElement): boolean;
 	gapClosest(domNode: HTMLElement): Gap;
-	fgs: FgInstance[];
-	classes: FgClass[];
+	fgs: Component[];
+	classes: ComponentClass[];
 	jq: any;
 };
 
@@ -24,11 +23,11 @@ const $fg: Helper = <Helper>function(arg: string | HTMLElement){
 
 export default $fg;
 
-$fg.load = function(fgData: any): FgClass | FgClass[]{
+$fg.load = function(fgData: any): ComponentClass | ComponentClass[]{
 	if (Array.isArray(fgData)){		
 		return fgData.map($fg.load);
 	};
-	return new FgClass(fgData);
+	//return new ComponentClass(fgData);
 };
 
 $fg.isFg = function(domNode: HTMLElement): boolean{
@@ -38,7 +37,7 @@ $fg.isFg = function(domNode: HTMLElement): boolean{
 const iidRe = /fg\-iid\-(\d+)/g;
 const idRe = /fg\-(\d+)\-gid\-(\d+)/g;
 
-$fg.byDom = function(domNode: HTMLElement): FgInstance{	
+$fg.byDom = function(domNode: HTMLElement): Component{	
 	if (!domNode || !domNode.className){
 		return null;
 	};

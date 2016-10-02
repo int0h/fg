@@ -1,7 +1,5 @@
 "use strict";
 
-//import {path} from 'path';
-
 import * as fs from 'fs';
 import * as fse from 'fs-extra';
 import * as path from 'path';
@@ -11,6 +9,8 @@ const tsify = require('tsify');
 import * as ts from 'typescript';
 import {FgMgr, IFgDeclaration} from './fgMgr';
 import * as serverUtils from './serverUtils';
+
+export {Component} from './client/componentBase';
 
 const fgLibPath = path.resolve(path.dirname(require.resolve('fg-js')) + '/', '..');
 

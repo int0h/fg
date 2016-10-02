@@ -1,15 +1,13 @@
 "use strict";
 
-import {FgInstance} from './fgInstance';
+import {Component} from './componentBase';
 import {IDataPath} from '../valueMgr';
-import {Tpl} from '../tplMgr';
 import * as utils from '../utils';
 import * as valueMgr from '../valueMgr';
-import {IAstNode} from '../tplMgr';
+import {IAstNode} from '../outerTypes';
 
 export interface IGapData{
 	type: string;
-	isVirtual?: boolean;
 	eid?: string;
 	scope?: {
 		name: string,
@@ -22,14 +20,14 @@ export interface IScopeTable {
 	[key: string]: IDataPath;
 };
 
-export type GapClass = new (context: FgInstance, parsedMeta: IGapData, parent: Gap) => Gap;
+export type GapClass = new (parsedMeta: IGapData, parent: Gap) => Gap;
 
 export abstract class Gap{
 	type: string;
 	children: Gap[] = [];
 	parent: Gap;
 	root: Gap;
-	context: FgInstance;
+	context: Component;
 	paths: IDataPath[] = [];	
 	deps: IDataPath[] = [];
 	eid: string;
@@ -39,10 +37,10 @@ export abstract class Gap{
 
 	public static priority: number = 0;
 
-	constructor (context: FgInstance, parsedMeta: IGapData, parent: Gap){	
+	constructor (parsedMeta: IGapData, parent: Gap){	
 		utils.extend(this, parsedMeta); // todo: why?
 		this.children = [];	
-		this.context = context;			
+		this.context = null;			
 		if (parent){
 			this.parent = parent;					
 			this.root = parent.root;
@@ -62,9 +60,9 @@ export abstract class Gap{
 		return null;
 	};
 
-	abstract render(context: FgInstance, data: any): string;
+	abstract render(context: Component, data: any): string;
 
-	update(context: FgInstance, meta: Gap, scopePath: any, value: any, oldValue: any): void{
+	update(context: Component, meta: Gap, scopePath: any, value: any, oldValue: any): void{
 		return;
 	};
 
@@ -122,13 +120,13 @@ export abstract class Gap{
 	};
 };
 
-export function render(context: FgInstance, parent: any, data: any, meta: any){
+export function render(context: Component, parent: any, data: any, meta: any){
 	var gapClass: any = gaps[meta.type];
 	var gap = new gapClass(context, meta, parent) as Gap;
 	return gap.render(context, data);
 };
 
-export function update(context: FgInstance, gapMeta: any, scopePath: any, value: any, oldValue: any){
+export function update(context: Component, gapMeta: any, scopePath: any, value: any, oldValue: any){
 	var gapClass: any = gaps[gapMeta.type];
 	if (!gapClass){
 		return;

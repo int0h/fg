@@ -1,7 +1,7 @@
 "use strict";
 
 import * as valueMgr from './valueMgr';
-import {IAstNode} from './tplMgr';
+import {IAstNode} from './outerTypes';
 export * from './utils/tplUtils';
 
 export function objFor(obj: any, fn: Function){

@@ -5,7 +5,7 @@ import {IAttrs} from '../utils/tplUtils';
 import * as valueMgr from '../valueMgr';  
 import * as strTpl from '../strTpl';  
 import {Gap, IGapData} from '../client/gapClassMgr';  
-import {FgInstance} from '../client/fgInstance';  
+import {Component} from '../client/componentBase'; 
 import {IAstNode} from '../outerTypes';
 import {Template, TplData} from '../tplMgr';
 import {IDataPath, IDataQuery} from '../valueMgr';
@@ -41,9 +41,9 @@ export default class GRaw extends Gap{
 	public static priority: number = -1;
 	public static isVirtual = false; 
 
-	constructor (context: FgInstance, parsedMeta: IRawParsedData, parent: Gap){
-		super(context, parsedMeta, parent);
-		this.content = new Template(context, parsedMeta.content, parent);		
+	constructor (parsedMeta: IRawParsedData, parent: Gap){
+		super(parsedMeta, parent);
+		this.content = new Template(parsedMeta.content, parent);		
 		this.paths = [];
 		if (this.value){
 			this.paths.push(this.value.path);
@@ -118,7 +118,7 @@ export default class GRaw extends Gap{
 		return meta;
 	};	
 
-	render(context: FgInstance, data: any): string{
+	render(context: Component, data: any): string{
 		const meta = this;
 		// if (meta.isScopeHolder){
 		// 	meta.root.currentScopeHolder = meta;		
@@ -133,7 +133,7 @@ export default class GRaw extends Gap{
 		let triggers: string[][] = [];
 		const inner = meta.value 
 			? valueMgr.render(meta, data, this.value)
-			: this.content.render(data);
+			: this.content.render(context, data);
 		return utils.renderTag({
 			"name": meta.tagName,
 			"attrs": attrObj,
@@ -141,7 +141,7 @@ export default class GRaw extends Gap{
 		});
 	};
 
-	update(context: FgInstance, meta: Gap, scopePath: any, value: any){
+	update(context: Component, meta: Gap, scopePath: any, value: any){
 		// to do value update
 		/*var attrData = utils.objPath(meta.scopePath, context.data);
 		var renderedAttrs = utils.renderAttrs(meta.attrs, attrData);*/

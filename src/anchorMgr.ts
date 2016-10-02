@@ -1,6 +1,6 @@
 "use strict";
 
-import {FgInstance} from './client/fgInstance';
+import {Component} from './client/componentBase';
 import {Gap} from './client/gapClassMgr';
 
 export type Anchor = HTMLElement;
@@ -10,7 +10,7 @@ export type Anchor = HTMLElement;
  * @param {Object} gap - Gap to which the acnchor is bind to.
  * @returns {string} Id of the anchor tag.
  */
-function genId(context: FgInstance, gap: Gap): string{
+function genId(context: Component, gap: Gap): string{
    	const id = ['fg', context.id, 'aid', gap.gid].join('-');
     return id;
 };
@@ -21,7 +21,7 @@ function genId(context: FgInstance, gap: Gap): string{
  * @param {Object} gap - Gap to which the acnchor is bind to.
  * @returns {string} Html code of the anchor. 
  */
-export function genCode(context: FgInstance, gap: Gap): string{
+export function genCode(context: Component, gap: Gap): string{
     const code = '<script type="fg-js/anchor" id="' 
         + genId(context, gap) 
         + '"></script>';
@@ -34,7 +34,7 @@ export function genCode(context: FgInstance, gap: Gap): string{
  * @param {Object} gap - Gap to which the acnchor is bind to.
  * @returns {Object} Dom element of the anchor.
  */
-export function find(context: FgInstance, gap: Gap): Anchor{
+export function find(context: Component, gap: Gap): Anchor{
    	const id = genId(context, gap);    
     return document.getElementById(id);
 };

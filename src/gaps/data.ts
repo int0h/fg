@@ -3,7 +3,7 @@
 import * as utils from '../utils';  
 import * as valueMgr from '../valueMgr';  
 import {Gap, IGapData} from '../client/gapClassMgr';  
-import {FgInstance} from '../client/fgInstance';  
+import {Component} from '../client/componentBase';  
 import {IAstNode} from '../outerTypes';
 import {IDataPath, IDataQuery} from '../valueMgr';
 
@@ -17,8 +17,8 @@ export default class GData extends Gap{
 	value: IDataQuery;
 	public static isVirtual = false; 
 
-	constructor (context: FgInstance, parsedMeta: IGapData, parent: Gap){
-		super(context, parsedMeta, parent);
+	constructor (parsedMeta: IGapData, parent: Gap){
+		super(parsedMeta, parent);
 		this.paths = [this.value.path];
 	};
 
@@ -36,7 +36,7 @@ export default class GData extends Gap{
 		return meta;
 	};
 
-	render(context: FgInstance, data: any): string{
+	render(context: Component, data: any): string{
 		const value = valueMgr.render(this, data, this.value);
 		return utils.renderTag({
 			name: "span",
@@ -45,7 +45,7 @@ export default class GData extends Gap{
 		});
 	};
 
-	update(context: FgInstance, meta: Gap, scopePath: any, value: any){
+	update(context: Component, meta: Gap, scopePath: any, value: any){
 		const node = meta.getDom()[0];
 		if (!node){
 			

@@ -2,9 +2,9 @@
 
 import * as utils from './utils';
 import * as path from 'path';
-import {IAstNode} from './tplMgr';
-import {Gap, IGapData} from './client/gapClassMgr';
-import {FgInstance} from './client/fgInstance';
+import {IAstNode} from './outerTypes';
+import {Gap, IGapData, GapClass} from './client/gapClassMgr';
+import {Component} from './client/componentBase';
 import {default as gaps} from './gaps';
 
 /**
@@ -29,7 +29,7 @@ export function parse(ast: IAstNode, parents: IGapData[], html: string): IGapDat
 	for (let name in gaps){
 		gapList.push({
 			name,
-			gap: gaps[name]
+			gap: gaps[name] as any as typeof Gap
 		});
 	};
 	gapList.sort((a: IGapItem, b: IGapItem) => {

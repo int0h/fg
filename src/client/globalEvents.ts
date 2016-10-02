@@ -1,4 +1,4 @@
-import {FgInstance} from './fgInstance';
+import {Component} from './componentBase';  
 
 interface IEventTable{
 	[key: string]: boolean;
@@ -12,7 +12,7 @@ export function handler(name: string, event: any){
 	const helper: any = win['$fg'];
 	let elm: HTMLElement = event.target;
 	while (elm){
-		let fg: FgInstance = helper.byDom(elm);
+		let fg: Component = helper.byDom(elm);
 		if (fg){
 			fg.emitApply(name, fg, [event]);
 			//return;
