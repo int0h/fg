@@ -1,6 +1,48 @@
 "use strict";
 
-var fs = require('fs');
+import * as fs from 'fs';
+import * as path from 'path';
+
+export enum FileKind{file, dir};
+
+export interface FileMapRes{
+	path: string;
+	kind: FileKind;
+	data?: Buffer | string;
+	stats?: fs.Stats;
+	files?: string[];
+};
+
+export type FileMapFn = (input: FileMapRes)=>FileMapRes;
+
+export function folderMapSync(src: string, dest: string, fn: FileMapFn){
+	fs.readdirSync(src).forEach(filename => {
+		const filePath = path.relative(src, filename);
+		const stats = fs.statSync(filePath);
+		if (stats.isFile()){
+			const srcContent = fs.readFileSync(filePath);
+			const res: FileMapRes = fn({
+				kind: FileKind.file,
+				path: filePath,
+				data: srcContent,
+				stats,
+				files: null
+			});
+			fs.writeFileSync(res.path, res.data);
+		};	
+		if (stats.isDirectory()){
+			const files = fs.readdirSync(filePath);
+			const res: FileMapRes = fn({
+				kind: FileKind.dir,
+				path: filePath,
+				data: null,
+				stats,
+				files
+			});
+			fs.mkdirSync(res.path);
+		};		
+	});
+};
 
 export interface IToJsOpts{
 	tab?: string;
@@ -54,7 +96,7 @@ export function strPrefix(prefix: string, str: string): string{
 };
 
 export function prefixLines(str: string, prefix: string, triggerFn: Function): string{
-	const lines = str.split('\n').map(function(line, id){
+	const lines: string[] = str.split('\n').map(function(line, id){
 		if (!triggerFn || triggerFn(line, id, lines)){
 			return prefix + line;
 		};

@@ -74,7 +74,7 @@ export default class GScope extends Gap{
 			},
 			content: null
 		};
-		meta.content = Template.parse(node, null, parents.concat([meta]));
+		meta.content = Template.read(node, null, parents.concat([meta]));
 		return meta;
 	};
 

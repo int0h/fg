@@ -97,7 +97,7 @@ export default class GRaw extends Gap{
 				escaped: node.value.escaped
 			});
 		};				
-		meta.content = Template.parse(node, null, parents.concat([meta]));		
+		meta.content = Template.read(node, null, parents.concat([meta]));		
 		if (meta.content.some(isScope)){
 			isScopeHolder = true;			
 		};

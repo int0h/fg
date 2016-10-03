@@ -23,9 +23,9 @@ const $fg: Helper = <Helper>function(arg: string | HTMLElement){
 
 export default $fg;
 
-$fg.load = function(fgData: any): ComponentClass | ComponentClass[]{
+$fg.load = function(fgData: any): any{
 	if (Array.isArray(fgData)){		
-		return fgData.map($fg.load);
+		return fgData.map($fg.load); 
 	};
 	//return new ComponentClass(fgData);
 };

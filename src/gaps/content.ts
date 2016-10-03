@@ -29,7 +29,7 @@ export default class GContent extends Gap{
 		};
 		let meta: IContentParsedData = {
 			type: "content",
-			content: Template.parse(node, null, parents)
+			content: Template.read(node, null, parents)
 		};
 		/*meta.fgName = node.nodeName.slice(3);
 		meta.path = node.attrs.class 

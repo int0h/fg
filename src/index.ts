@@ -6,13 +6,63 @@ import * as path from 'path';
 import * as gapClassMgr from './gapServer';
 import * as browserify from 'browserify';
 const tsify = require('tsify');
+const microJade = require('micro-jade');
 import * as ts from 'typescript';
 import {FgMgr, IFgDeclaration} from './fgMgr';
 import * as serverUtils from './serverUtils';
+import {Template, TplData} from './tplMgr';
 
 export {Component} from './client/componentBase';
 
 const fgLibPath = path.resolve(path.dirname(require.resolve('fg-js')) + '/', '..');
+
+function parseTpl(code: string): TplData{
+	const mjAst = microJade.parse(code);
+	return Template.read(mjAst, null, []);
+};
+
+function transformTpl(code: string): string{
+	const parsed = parseTpl(code);
+	const json = JSON.stringify(parsed);
+	let res = "const tpl = " + json + ";\n";
+	res += "export default tpl;";
+	return res;
+};
+
+interface FgMeta{
+	path: string;
+	tpl: string;
+	classFn: string;
+	subs: FgMeta[];
+}
+
+function transformFgDir(srcPath: string, destPath: string){
+	let meta: FgMeta = {
+		path: srcPath,
+		tpl: null,
+		classFn: null,
+		subs: []
+	};
+	fs.readdirSync(srcPath).forEach(filename => {
+		const srcFilePath = path.resolve(srcPath, filename);
+		const isDir = fs.statSync(srcFilePath).isDirectory();
+		let destFilePath = path.resolve(destPath, filename);	
+		if (isDir){
+			fs.mkdirSync(destFilePath);
+			const sub = transformFgDir(srcFilePath, destFilePath);
+			meta.subs.push(sub);
+			return;
+		};
+		if (filename === "tpl.jade"){
+			const tplJade = fs.readFileSync(srcPath).toString();
+			const compiled = transformTpl(tplJade);
+			destFilePath = path.resolve(destPath, 'tpl.ts');
+			fs.writeFileSync(destFilePath, compiled); 
+			meta.tpl = srcFilePath;
+		};
+	});
+	return meta;
+};
 
 function getSubDirs(srcpath: string): string[]{
 	return fs.readdirSync(srcpath).filter(function(file) {

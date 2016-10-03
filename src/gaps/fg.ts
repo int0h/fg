@@ -37,7 +37,7 @@ export default class GFg extends Gap{
 			fgName: node.tagName.slice(3),
 			dataSource: resolvedQuery,
 			eid: node.attrs.id || null,
-			content: Template.parse(node, null, parents)
+			content: Template.read(node, null, parents)
 		};
 		return meta;
 	};

@@ -4,6 +4,7 @@ import * as valueMgr from './valueMgr';
 import {IAstNode} from './outerTypes';
 export * from './utils/tplUtils';
 
+
 export function objFor(obj: any, fn: Function){
 	for (var i in obj){
 		fn(obj[i], i, obj);

@@ -26,7 +26,7 @@ export class Template {
 		});
 	};
 
-	static parse(ast: IAstNode, code: string, parents: IGapData[]): TplData{	
+	static read(ast: IAstNode, code: string, parents: IGapData[]): TplData{	
 
 		function iterate(children: IAstNode[]): TplData{
 			let parts: TplData = [];
