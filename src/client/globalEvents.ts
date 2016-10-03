@@ -6,7 +6,16 @@ interface IEventTable{
 
 var events: IEventTable = {};
 
-const win: any = window;
+let win: any; 
+try {
+	win = window;
+}catch(e){
+	try {
+		win = global;
+	}catch(e){
+
+	};
+};
 
 export function handler(name: string, event: any){
 	const helper: any = win['$fg'];
