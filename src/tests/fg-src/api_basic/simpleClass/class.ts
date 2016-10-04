@@ -1,5 +1,5 @@
-import {Component} from 'fg-js';
+// import {Component} from 'fg-js';
 
-export class TestClass extends Component{
+// export class TestClass extends Component{
 
-};
+// }; 

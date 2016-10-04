@@ -43,23 +43,29 @@ function transformFgDir(srcPath: string, destPath: string){
 		classFn: null,
 		subs: []
 	};
+	const tplPath = path.resolve(srcPath, './tpl.jade');
+	if (serverUtils.fileExist(tplPath)){
+		meta.tpl = fs.readFileSync(tplPath).toString();
+	}else{
+
+	};
+	const isDir = fs.statSync(srcFilePath).isDirectory();
+	let destFilePath = path.resolve(destPath, filename);	
+	if (isDir){
+		fse.ensureDirSync(destFilePath);
+		const sub = transformFgDir(srcFilePath, destFilePath);
+		meta.subs.push(sub);
+		return;
+	};
+	if (filename === "tpl.jade"){
+		const tplJade = fs.readFileSync(srcFilePath).toString();
+		const compiled = transformTpl(tplJade);
+		destFilePath = path.resolve(destPath, 'tpl.ts');
+		fs.writeFileSync(destFilePath, compiled); 			
+		meta.tpl = fs.readFileSync(srcFilePath).toString();
+	};
 	fs.readdirSync(srcPath).forEach(filename => {
-		const srcFilePath = path.resolve(srcPath, filename);
-		const isDir = fs.statSync(srcFilePath).isDirectory();
-		let destFilePath = path.resolve(destPath, filename);	
-		if (isDir){
-			fs.mkdirSync(destFilePath);
-			const sub = transformFgDir(srcFilePath, destFilePath);
-			meta.subs.push(sub);
-			return;
-		};
-		if (filename === "tpl.jade"){
-			const tplJade = fs.readFileSync(srcPath).toString();
-			const compiled = transformTpl(tplJade);
-			destFilePath = path.resolve(destPath, 'tpl.ts');
-			fs.writeFileSync(destFilePath, compiled); 
-			meta.tpl = srcFilePath;
-		};
+		
 	});
 	return meta;
 };
@@ -109,15 +115,18 @@ export function loadDir(fgMgr: FgMgr, path: string){
 
 export function buildTest(cb: Function){
 	const testDir = fgLibPath + '/src/tests/';
-	buildRuntime(fgLibPath + '/build/tests/build/runtime.js', function(err: Error){
-		if (err){
-			cb(err);
-			return;
-		};
-		build(testDir + '/fg-src/', fgLibPath + '/build/tests/build/fg.js', function(err: Error){
+	build(testDir + '/fg-src/', fgLibPath + '/build/tests/build/fg.js', function(err: Error){
 			cb(err);
 		});
-	});
+	// buildRuntime(fgLibPath + '/build/tests/build/runtime.js', function(err: Error){
+	// 	if (err){
+	// 		cb(err);
+	// 		return;
+	// 	};
+	// 	build(testDir + '/fg-src/', fgLibPath + '/build/tests/build/fg.js', function(err: Error){
+	// 		cb(err);
+	// 	});
+	// });
 };
 
 
@@ -155,54 +164,57 @@ const includeFgCode = `fgs.push({
 
 export function build(srcPath: string, destPath: string, cb: Function){
 	const fgMgr = new FgMgr();
-	loadDir(fgMgr, srcPath);
+	console.log('sadsad');
 	//var tempPath = path.resolve(fgLibPath, './temp');	
-	const tempPath = path.resolve(process.cwd(), './temp');	
-	fse.emptyDirSync(tempPath);
-	let includeCodeParts: string[] = []; 
-	for (let i in fgMgr.fgs){
-		const fg = fgMgr.fgs[i];
-		const fgPath = tempPath + '/' + fg.name;
-		fs.mkdirSync(fgPath);		
-		if (fg.classFn){
-			const classCode = 'module.exports = ' + fg.classFn.toString();
-			fs.writeFileSync(fgPath + '/class.js', classCode);
-		};
-		const tplSource = '/*\n' + fg.tplSource + '\n*/\n\n';
-		const tplCode = tplSource + 'module.exports = ' + serverUtils.toJs(fg.tpl);	
-		fs.writeFileSync(fgPath + '/tpl.js', tplCode);
-		includeCodeParts.push(includeFgCode
-			.replace('%name%', fg.name) 
-			.replace('%tpl%', 'require("./' + fg.name + '/tpl.js")')
-			.replace('%classFn%', fg.classFn 
-				? 'require("./' + fg.name + '/class.js")'
-				: null
-				)
-			);		
-	};
-	const includeCode = includeWrap.join(includeCodeParts.join('\n'));
-	const includePath = tempPath + '/' + 'include.js';
-	fs.writeFileSync(includePath, includeCode);
-	const brofy = browserify({
-		debug: true
-	});
-	brofy
-		.plugin(tsify)	
-		.add(includePath).bundle(function(err: any, code: Buffer){
-			if (err){
-				console.error(err);
-				return;
-			};
-			fs.writeFileSync(destPath, code);
-			cb(null);
-		});
-	ts.transpileModule(includeCode, {
-		compilerOptions: {
-			module: ts.ModuleKind.System,
-			outFile: destPath,
-			sourceRoot: tempPath
-		}
-	});	
+	const tempPath = path.resolve(process.cwd(), './temp2');
+	const meta = transformFgDir(srcPath, tempPath);
+	console.log(meta);
+	return;	
+	// fse.emptyDirSync(tempPath);
+	// let includeCodeParts: string[] = []; 
+	// for (let i in fgMgr.fgs){
+	// 	const fg = fgMgr.fgs[i];
+	// 	const fgPath = tempPath + '/' + fg.name;
+	// 	fs.mkdirSync(fgPath);		
+	// 	if (fg.classFn){
+	// 		const classCode = 'module.exports = ' + fg.classFn.toString();
+	// 		fs.writeFileSync(fgPath + '/class.js', classCode);
+	// 	};
+	// 	const tplSource = '/*\n' + fg.tplSource + '\n*/\n\n';
+	// 	const tplCode = tplSource + 'module.exports = ' + serverUtils.toJs(fg.tpl);	
+	// 	fs.writeFileSync(fgPath + '/tpl.js', tplCode);
+	// 	includeCodeParts.push(includeFgCode
+	// 		.replace('%name%', fg.name) 
+	// 		.replace('%tpl%', 'require("./' + fg.name + '/tpl.js")')
+	// 		.replace('%classFn%', fg.classFn 
+	// 			? 'require("./' + fg.name + '/class.js")'
+	// 			: null
+	// 			)
+	// 		);		
+	// };
+	// const includeCode = includeWrap.join(includeCodeParts.join('\n'));
+	// const includePath = tempPath + '/' + 'include.js';
+	// fs.writeFileSync(includePath, includeCode);
+	// const brofy = browserify({
+	// 	debug: true
+	// });
+	// brofy
+	// 	.plugin(tsify)	
+	// 	.add(includePath).bundle(function(err: any, code: Buffer){
+	// 		if (err){
+	// 			console.error(err);
+	// 			return;
+	// 		};
+	// 		fs.writeFileSync(destPath, code);
+	// 		cb(null);
+	// 	});
+	// ts.transpileModule(includeCode, {
+	// 	compilerOptions: {
+	// 		module: ts.ModuleKind.System,
+	// 		outFile: destPath,
+	// 		sourceRoot: tempPath
+	// 	}
+	// });	
 
 	//fs.writeFileSync(destPath, fgMgr.genClientMeta());	
 	//cb(null);

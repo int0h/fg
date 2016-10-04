@@ -23,6 +23,7 @@
         "experimentalDecorators": true,
         "allowJs": true,
         "baseUrl": ".",
+        "rootDir": "./src",
         "paths": {
             "fg-js": ["."]
         }
