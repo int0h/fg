@@ -8,7 +8,7 @@
 // 	},
 // 	"exclude": [
 // 		"node_modules",
-// 		"bower_components",
+// 		"bower_components", 
 // 		"jspm_packages"		
 // 	]
 // }
@@ -16,23 +16,16 @@
 {
     "compilerOptions": {
         "target": "es5",
-        "outDir": "./build/",
-        "declaration": true,
+        "rootDir": "./node_modules/fg-js/src",
+        "moduleResolution": "node",
         "inlineSourceMap": true,
-        "noImplicitAny": true,
-        "experimentalDecorators": true,
-        "allowJs": true,
-        "baseUrl": ".",
-        "rootDir": "./src",
-        "paths": {
-            "fg-js": ["."]
-        }
+        "declaration": true,
+        //"declarationDir": "./node_modules/@types/fg-js/src/",
+        "declarationDir": "./node_modules/fg-js/build",
+        //"declarationDir": "./node_modules/fg-js/types/",
+        "outDir": "./node_modules/fg-js/build"   
     },
-    "exclude": [
-        "./src/node_modules",
-        "./build/node_modules",
-        "node_modules",
-        "build",
-        "temp"
+    "files": [
+        "./node_modules/fg-js/src/index.ts"
     ]
-}
+} 
