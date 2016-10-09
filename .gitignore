@@ -1,6 +1,4 @@
-node_modules
-src/node_modules
-build/node_modules
+node_modules/fg-js/node_modules
 temp
 temp2
 typings
@@ -38,7 +36,7 @@ coverage
 build/Release
 
 # Dependency directories
-node_modules
+#node_modules
 jspm_packages
 
 # Optional npm cache directory
