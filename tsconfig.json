@@ -23,9 +23,10 @@
         //"declarationDir": "./node_modules/@types/fg-js/src/",
         "declarationDir": "./node_modules/fg-js/build",
         //"declarationDir": "./node_modules/fg-js/types/",
-        "outDir": "./node_modules/fg-js/build"   
+        "outDir": "./node_modules/fg-js/build"
     },
     "files": [
-        "./node_modules/fg-js/src/index.ts"
+        "./node_modules/fg-js/src/index.ts",
+        "./node_modules/fg-js/src/client/main.ts"
     ]
 } 
