@@ -15,7 +15,7 @@ scope.noScope
 //- nested scope
 scope.nested
     | Kind: #{$scope.kind}
-    scope.values
+    scope(path="$scope.values")
         .subScopeItem
             data(path="$scope")
 //- named scopes
