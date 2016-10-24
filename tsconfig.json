@@ -23,7 +23,11 @@
         //"declarationDir": "./node_modules/@types/fg-js/src/",
         "declarationDir": "./node_modules/fg-js/build",
         //"declarationDir": "./node_modules/fg-js/types/",
-        "outDir": "./node_modules/fg-js/build"
+        "outDir": "./node_modules/fg-js/build",
+        "noImplicitAny": true,
+        "typeRoots": [
+            "./node_modules/@types"
+        ]
     },
     "files": [
         "./node_modules/fg-js/src/index.ts",
