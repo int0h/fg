@@ -2,7 +2,7 @@
 div= val
 //- scope update:
 scope.basicScope
-    data
+    data(path="$scope")
 //- empty scope
 scope.emptyScope
     div.mustNotBeHere
@@ -12,5 +12,5 @@ scope.noScope
 //- no array scope
 .person
     scope.person
-        data.name
-        data.dob
+        data(path="$scope.name")
+        data(path="$scope.dob")
