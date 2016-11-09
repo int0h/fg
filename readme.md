@@ -1,3 +1,7 @@
+## Work in progress
+
+The current version of the lib is in WIP state. It doesn't work well and it's not a good point to start exploring the lib. A working example of it could be found here: [https://int0h.github.io/fg-site/](https://int0h.github.io/fg-site/)  
+
 # Fg-js
 
 Fg-js is a small library that allows to create and use components. “Fg” is a short form for “fragment”. The library is designed to:
