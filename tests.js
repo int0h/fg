@@ -165,6 +165,10 @@ QUnit.test("Basic update", function(assert){
 	dataObj.basicScope.push("bs-4");
 	fg.update(dataObj);
 	assert.ok(hasText(sandBox, ["bs-4"]), 'Scope push');	
+
+	dataObj.basicScope.pop();
+	fg.update(dataObj);
+	assert.ok(!hasText(sandBox, ["bs-4"]), 'Scope pop');	
 	
 	// fg.update(['basicScope'], ["bs-1", "bs-3", 'bs-4']);	
 	// assert.ok(hasText(sandBox, ["bs-4"]), 'Scope push');	
