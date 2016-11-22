@@ -10,6 +10,45 @@ function parseTag(code){
 	return parseHtml(code).children[0];	
 };
 
+function traverseClassTree(treeObj){
+	if (!treeObj){
+		return;
+	};
+	var testFn = treeObj.$ && treeObj.$.test && treeObj.$.test.bind(treeObj.$);
+	if (testFn){
+		testFn(QUnit);
+	};
+	for (var i in treeObj){
+		if (i === '$'){
+			continue;
+		};
+		traverseClassTree(treeObj[i]);
+	};
+};
+
+traverseClassTree($fg.classes.newTests);
+
+function TestMatrix (){
+	this.matrix = {};
+}
+
+TestMatrix.prototype.assert = function(pair, result){
+	var rowKey = Object.keys(pair)[0];
+	var columnKey = pair[rowKey];
+	var row = this.matrix[rowKey];
+	if (!row){
+		row = {};
+		this.matrix[rowKey] = row;
+	};
+	row[columnKey] = result;
+};
+
+TestMatrix.prototype.log = function(){
+	console.table(this.matrix);
+};
+
+var matrix = new TestMatrix();
+
 QUnit.test("Basic", function(assert){
 	assert.ok(!!$fg, 'Global helper exists!');
 	assert.ok(!!$fg.classes.basic, 'Basic class exists!');
@@ -195,3 +234,5 @@ QUnit.test("API test: getDom", function(assert){
 	assert.equal(multiRoot.getDom().length, 2, '> 1 dom elm of multy fg');
 	
 });
+
+matrix.log();

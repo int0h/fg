@@ -12,9 +12,18 @@
 + fix deploying
     + fix test building
 
+- require 'fg-js' instead of 'fg-js/build/....'
+    - the problem is: I don't wanna to import whole lib I only need a client
+        so it should be 'fg-js/client' at least
+
 - since we dont have instances of gaps we needed to store dynamic path in id (I'm not sure if that 
     is a good idea in general btw), 
     what became a problem in a case of trying to insert some new scope-items in the beggining of the list;
     I suppose the best option (at least for now) is to ignore adding content before content; 
     It's may be not the most optimal way to solve the problem, on the other hand it could probably make 
     some other parts of lib easier to develop. Also I'm not sure if the profit from "unshifting" is significant.
+
+- refactor tests
+    - add feature/fix - tests (they can overlap with the base)
+
+- move from QUnit?    
