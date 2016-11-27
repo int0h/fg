@@ -26,4 +26,8 @@
 - refactor tests
     - add feature/fix - tests (they can overlap with the base)
 
-- move from QUnit?    
+- move from QUnit?
+
+- incremental build
+    - complie a single file
+    - watchify integration
